@@ -83,10 +83,10 @@ impl TcpServerHandler for WebsocketTcpServerHandler {
                 override_proxy_provider,
             } = server_target;
 
-            if let Some(path) = matching_path {
-                if path != &request_path {
-                    continue;
-                }
+            if let Some(path) = matching_path
+                && path != &request_path
+            {
+                continue;
             }
 
             if let Some(headers) = matching_headers {

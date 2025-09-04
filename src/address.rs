@@ -38,16 +38,15 @@ impl Address {
             }
         }
 
-        if possible_ipv4 && dots == 3 {
-            if let Ok(addr) = s.parse::<Ipv4Addr>() {
-                return Ok(Address::Ipv4(addr));
-            }
+        if possible_ipv4
+            && dots == 3
+            && let Ok(addr) = s.parse::<Ipv4Addr>()
+        {
+            return Ok(Address::Ipv4(addr));
         }
 
-        if possible_ipv6 {
-            if let Ok(addr) = s.parse::<Ipv6Addr>() {
-                return Ok(Address::Ipv6(addr));
-            }
+        if possible_ipv6 && let Ok(addr) = s.parse::<Ipv6Addr>() {
+            return Ok(Address::Ipv6(addr));
         }
 
         if possible_hostname {

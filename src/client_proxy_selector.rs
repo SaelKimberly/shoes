@@ -117,10 +117,9 @@ impl<T> ClientProxySelector<T> {
                 ref override_address,
                 ..
             } = rule.action
+                && override_address.is_some()
             {
-                if override_address.is_some() {
-                    continue;
-                }
+                continue;
             }
             let is_cover_rule = rule.masks.iter().any(|mask| mask.address_mask.netmask == 0);
             if is_cover_rule {

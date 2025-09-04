@@ -111,13 +111,13 @@ impl TcpServerHandler for TlsServerHandler {
                             return;
                         }
                         let unparsed_data = client_reader.unparsed_data();
-                        if !unparsed_data.is_empty() {
-                            if let Err(e) = feed_server_connection(server_conn, unparsed_data) {
-                                let _ = accept_error.insert(std::io::Error::other(format!(
-                                    "Failed to feed unparsed data to server connection: {e}"
-                                )));
-                                return;
-                            }
+                        if !unparsed_data.is_empty()
+                            && let Err(e) = feed_server_connection(server_conn, unparsed_data)
+                        {
+                            let _ = accept_error.insert(std::io::Error::other(format!(
+                                "Failed to feed unparsed data to server connection: {e}"
+                            )));
+                            return;
                         }
                         if let Err(e) = server_conn.process_new_packets() {
                             let _ = accept_error.insert(std::io::Error::other(format!(

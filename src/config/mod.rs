@@ -327,20 +327,19 @@ fn gather_pem_file_paths_from_rule(
     known_pem_paths: &HashMap<String, NamedPem>,
     unknown_pem_paths: &mut HashMap<String, String>,
 ) {
-    if let ConfigSelection::Config(rule) = rule_selection {
-        if let RuleActionConfig::Allow {
+    if let ConfigSelection::Config(rule) = rule_selection
+        && let RuleActionConfig::Allow {
             ref mut client_proxies,
             ..
         } = rule.action
-        {
-            for client_selection in client_proxies.iter_mut() {
-                if let ConfigSelection::Config(client_config) = client_selection {
-                    gather_pem_file_paths_from_client_config(
-                        client_config,
-                        known_pem_paths,
-                        unknown_pem_paths,
-                    );
-                }
+    {
+        for client_selection in client_proxies.iter_mut() {
+            if let ConfigSelection::Config(client_config) = client_selection {
+                gather_pem_file_paths_from_client_config(
+                    client_config,
+                    known_pem_paths,
+                    unknown_pem_paths,
+                );
             }
         }
     }
@@ -430,13 +429,13 @@ fn validate_server_config(
         ));
     }
 
-    if let BindLocation::Path(_) = server_config.bind_location {
-        if server_config.transport != Transport::Tcp {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::InvalidInput,
-                "Unix domain socket support only available for TCP transport",
-            ));
-        }
+    if let BindLocation::Path(_) = server_config.bind_location
+        && server_config.transport != Transport::Tcp
+    {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "Unix domain socket support only available for TCP transport",
+        ));
     }
 
     ConfigSelection::replace_none_or_some_groups(&mut server_config.rules, rule_groups)?;
@@ -678,13 +677,13 @@ fn validate_server_proxy_config(
                 }
             }
 
-            if let Some(size) = tls_buffer_size {
-                if *size < MIN_TLS_BUFFER_SIZE {
-                    return Err(std::io::Error::new(
-                        std::io::ErrorKind::InvalidInput,
-                        format!("TLS buffer size must be at least {MIN_TLS_BUFFER_SIZE}"),
-                    ));
-                }
+            if let Some(size) = tls_buffer_size
+                && *size < MIN_TLS_BUFFER_SIZE
+            {
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::InvalidInput,
+                    format!("TLS buffer size must be at least {MIN_TLS_BUFFER_SIZE}"),
+                ));
             }
         }
         ServerProxyConfig::Websocket { targets } => {
@@ -968,44 +967,44 @@ mod tests {
 
         // Check client certificates in rules
         for rule_selection in server_config.rules.iter() {
-            if let ConfigSelection::Config(rule) = rule_selection {
-                if let RuleActionConfig::Allow { client_proxies, .. } = &rule.action {
-                    for client_selection in client_proxies.iter() {
-                        if let ConfigSelection::Config(client_config) = client_selection {
-                            // Check client QUIC settings
-                            let client_quic = client_config.quic_settings.as_ref().unwrap();
+            if let ConfigSelection::Config(rule) = rule_selection
+                && let RuleActionConfig::Allow { client_proxies, .. } = &rule.action
+            {
+                for client_selection in client_proxies.iter() {
+                    if let ConfigSelection::Config(client_config) = client_selection {
+                        // Check client QUIC settings
+                        let client_quic = client_config.quic_settings.as_ref().unwrap();
+                        assert!(
+                            client_quic
+                                .cert
+                                .as_ref()
+                                .unwrap()
+                                .contains("BEGIN CERTIFICATE")
+                        );
+                        assert!(
+                            client_quic
+                                .key
+                                .as_ref()
+                                .unwrap()
+                                .contains("BEGIN PRIVATE KEY")
+                        );
+
+                        // Check client TLS settings
+                        if let ClientProxyConfig::Tls(tls_client) = &client_config.protocol {
                             assert!(
-                                client_quic
+                                tls_client
                                     .cert
                                     .as_ref()
                                     .unwrap()
                                     .contains("BEGIN CERTIFICATE")
                             );
                             assert!(
-                                client_quic
+                                tls_client
                                     .key
                                     .as_ref()
                                     .unwrap()
                                     .contains("BEGIN PRIVATE KEY")
                             );
-
-                            // Check client TLS settings
-                            if let ClientProxyConfig::Tls(tls_client) = &client_config.protocol {
-                                assert!(
-                                    tls_client
-                                        .cert
-                                        .as_ref()
-                                        .unwrap()
-                                        .contains("BEGIN CERTIFICATE")
-                                );
-                                assert!(
-                                    tls_client
-                                        .key
-                                        .as_ref()
-                                        .unwrap()
-                                        .contains("BEGIN PRIVATE KEY")
-                                );
-                            }
                         }
                     }
                 }

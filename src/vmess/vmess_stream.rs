@@ -528,20 +528,19 @@ impl VmessStream {
             }
         };
 
-        if let Some(ref mut opening_key) = self.opening_key {
-            if opening_key
+        if let Some(ref mut opening_key) = self.opening_key
+            && opening_key
                 .open_in_place(
                     Aad::empty(),
                     &mut self.unprocessed_buf[self.unprocessed_start_offset
                         ..self.unprocessed_start_offset + data_len - padding_len],
                 )
                 .is_err()
-            {
-                return Err(std::io::Error::new(
-                    std::io::ErrorKind::InvalidData,
-                    "open failed for data",
-                ));
-            }
+        {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                "open failed for data",
+            ));
         }
 
         let processed_data_len = data_len - padding_len - self.tag_len;

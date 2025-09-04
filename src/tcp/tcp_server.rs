@@ -42,10 +42,8 @@ async fn run_tcp_server(
             }
         };
 
-        if no_delay {
-            if let Err(e) = stream.set_nodelay(true) {
-                error!("Failed to set TCP nodelay: {e}");
-            }
+        if no_delay && let Err(e) = stream.set_nodelay(true) {
+            error!("Failed to set TCP nodelay: {e}");
         }
 
         // TODO: allow this be to Option<Arc<ClientProxySelector<..>>> when

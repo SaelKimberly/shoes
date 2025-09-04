@@ -210,10 +210,8 @@ impl TcpClientConnector {
                 let tcp_socket =
                     new_tcp_socket(self.bind_interface.clone(), target_addr.is_ipv6())?;
                 let client_stream = tcp_socket.connect(target_addr).await?;
-                if no_delay {
-                    if let Err(e) = client_stream.set_nodelay(true) {
-                        error!("Failed to set TCP no-delay on client socket: {e}");
-                    }
+                if no_delay && let Err(e) = client_stream.set_nodelay(true) {
+                    error!("Failed to set TCP no-delay on client socket: {e}");
                 }
                 Box::new(client_stream)
             }
