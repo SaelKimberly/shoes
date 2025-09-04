@@ -18,7 +18,7 @@ use crate::async_stream::AsyncStream;
 use crate::client_proxy_selector::{ClientProxySelector, ConnectDecision};
 use crate::copy_bidirectional::copy_bidirectional_with_sizes;
 use crate::quic_stream::QuicStream;
-use crate::resolver::{resolve_single_address, Resolver};
+use crate::resolver::{Resolver, resolve_single_address};
 use crate::socket_util::new_socket2_udp_socket;
 use crate::stream_reader::StreamReader;
 use crate::tcp_client_connector::TcpClientConnector;

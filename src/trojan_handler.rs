@@ -11,7 +11,7 @@ use crate::option_util::NoneOrOne;
 use crate::shadowsocks::{
     DefaultKey, ShadowsocksCipher, ShadowsocksKey, ShadowsocksStream, ShadowsocksStreamType,
 };
-use crate::socks_handler::{read_location, write_location_to_vec, CMD_CONNECT, CMD_UDP_ASSOCIATE};
+use crate::socks_handler::{CMD_CONNECT, CMD_UDP_ASSOCIATE, read_location, write_location_to_vec};
 use crate::stream_reader::StreamReader;
 use crate::tcp_handler::{
     TcpClientHandler, TcpClientSetupResult, TcpServerHandler, TcpServerSetupResult,

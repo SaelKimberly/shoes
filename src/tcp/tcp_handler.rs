@@ -40,15 +40,15 @@ impl TcpServerSetupResult {
     pub fn set_need_initial_flush(&mut self, need_initial_flush: bool) {
         match self {
             TcpServerSetupResult::TcpForward {
-                need_initial_flush: ref mut flush,
+                need_initial_flush: flush,
                 ..
             }
             | TcpServerSetupResult::BidirectionalUdp {
-                need_initial_flush: ref mut flush,
+                need_initial_flush: flush,
                 ..
             }
             | TcpServerSetupResult::MultiDirectionalUdp {
-                need_initial_flush: ref mut flush,
+                need_initial_flush: flush,
                 ..
             } => {
                 *flush = need_initial_flush;
@@ -78,15 +78,15 @@ impl TcpServerSetupResult {
     ) {
         match self {
             TcpServerSetupResult::TcpForward {
-                override_proxy_provider: ref mut provider,
+                override_proxy_provider: provider,
                 ..
             }
             | TcpServerSetupResult::BidirectionalUdp {
-                override_proxy_provider: ref mut provider,
+                override_proxy_provider: provider,
                 ..
             }
             | TcpServerSetupResult::MultiDirectionalUdp {
-                override_proxy_provider: ref mut provider,
+                override_proxy_provider: provider,
                 ..
             } => {
                 *provider = override_proxy_provider;

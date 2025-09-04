@@ -50,7 +50,7 @@ use log::debug;
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use tcp_server::start_tcp_servers;
 use tokio::runtime::Builder;
-use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver};
+use tokio::sync::mpsc::{UnboundedReceiver, unbounded_channel};
 use tokio::task::JoinHandle;
 
 use crate::config::{ServerConfig, Transport};
@@ -125,7 +125,9 @@ async fn start_servers(config: ServerConfig) -> std::io::Result<Vec<JoinHandle<(
 }
 
 fn print_usage_and_exit(arg0: String) {
-    eprintln!("Usage: {arg0} [--threads/-t N] <server uri or config filename> [server uri or config filename] [..]");
+    eprintln!(
+        "Usage: {arg0} [--threads/-t N] <server uri or config filename> [server uri or config filename] [..]"
+    );
     std::process::exit(1);
 }
 

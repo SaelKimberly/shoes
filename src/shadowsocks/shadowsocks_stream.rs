@@ -4,7 +4,7 @@ use std::task::{Context, Poll};
 use std::time::SystemTime;
 
 use aws_lc_rs::aead::{
-    Aad, Algorithm, BoundKey, Nonce, NonceSequence, OpeningKey, SealingKey, UnboundKey, NONCE_LEN,
+    Aad, Algorithm, BoundKey, NONCE_LEN, Nonce, NonceSequence, OpeningKey, SealingKey, UnboundKey,
 };
 use aws_lc_rs::error::Unspecified;
 use futures::ready;

@@ -17,7 +17,7 @@ use crate::copy_bidirectional::copy_bidirectional;
 use crate::copy_bidirectional_message::copy_bidirectional_message;
 use crate::copy_multidirectional_message::copy_multidirectional_message;
 use crate::quic_stream::QuicStream;
-use crate::resolver::{resolve_single_address, NativeResolver, Resolver};
+use crate::resolver::{NativeResolver, Resolver, resolve_single_address};
 use crate::rustls_util::create_server_config;
 use crate::socket_util::new_socket2_udp_socket;
 use crate::tcp_client_connector::TcpClientConnector;
@@ -313,7 +313,9 @@ async fn process_streams(
                     Ok(())
                 }
                 ConnectDecision::Block => {
-                    warn!("Blocked multidirectional udp forward, because the default action is to block.");
+                    warn!(
+                        "Blocked multidirectional udp forward, because the default action is to block."
+                    );
                     // TODO: add async trait ext and make this work
                     // let _ = server_stream.shutdown_message().await;
                     Ok(())

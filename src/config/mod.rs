@@ -266,7 +266,7 @@ fn gather_pem_file_paths_from_server_proxy(
             }
 
             // Process default TLS target
-            if let Some(ref mut tls_config) = default_tls_target {
+            if let Some(tls_config) = default_tls_target {
                 process_pem_path(&mut tls_config.cert, known_pem_paths, unknown_pem_paths);
                 process_pem_path(&mut tls_config.key, known_pem_paths, unknown_pem_paths);
                 for cert in tls_config.client_ca_certs.iter_mut() {
@@ -370,7 +370,7 @@ fn gather_pem_file_paths_from_client_proxy(
     known_pem_paths: &HashMap<String, NamedPem>,
     unknown_pem_paths: &mut HashMap<String, String>,
 ) {
-    if let ClientProxyConfig::Tls(ref mut tls_config) = client_proxy {
+    if let ClientProxyConfig::Tls(tls_config) = client_proxy {
         process_optional_pem_path(&mut tls_config.cert, known_pem_paths, unknown_pem_paths);
         process_optional_pem_path(&mut tls_config.key, known_pem_paths, unknown_pem_paths);
         // Recurse into inner protocol
@@ -550,7 +550,7 @@ fn validate_client_proxy_config(
     client_proxy_config: &mut ClientProxyConfig,
     named_pems: &HashMap<String, String>,
 ) -> std::io::Result<()> {
-    if let ClientProxyConfig::Tls(ref mut tls_config) = client_proxy_config {
+    if let ClientProxyConfig::Tls(tls_config) = client_proxy_config {
         // Embed certificates before validation
         embed_optional_pem_from_map(&mut tls_config.cert, named_pems);
         embed_optional_pem_from_map(&mut tls_config.key, named_pems);
@@ -658,7 +658,7 @@ fn validate_server_proxy_config(
                     ..
                 } = *tls_server_config;
 
-                if let ShadowTlsServerHandshakeConfig::Local(ref mut local_handshake) = handshake {
+                if let ShadowTlsServerHandshakeConfig::Local(local_handshake) = handshake {
                     // Embed certificates for local handshake
                     embed_pem_from_map(&mut local_handshake.cert, named_pems);
                     embed_pem_from_map(&mut local_handshake.key, named_pems);
@@ -690,8 +690,8 @@ fn validate_server_proxy_config(
         ServerProxyConfig::Websocket { targets } => {
             for websocket_server_config in targets.iter_mut() {
                 let WebsocketServerConfig {
-                    ref mut protocol,
-                    ref mut override_rules,
+                    protocol,
+                    override_rules,
                     ..
                 } = websocket_server_config;
                 validate_server_proxy_config(protocol, client_groups, rule_groups, named_pems)?;
@@ -776,7 +776,7 @@ fn process_optional_pem_path(
     known_pem_paths: &HashMap<String, NamedPem>,
     unknown_pem_paths: &mut HashMap<String, String>,
 ) {
-    if let Some(ref mut pem_str) = pem {
+    if let Some(pem_str) = pem {
         process_pem_path(pem_str, known_pem_paths, unknown_pem_paths);
     }
 }
@@ -790,7 +790,7 @@ fn embed_pem_from_map(pem: &mut String, named_pems: &HashMap<String, String>) {
 }
 
 fn embed_optional_pem_from_map(pem: &mut Option<String>, named_pems: &HashMap<String, String>) {
-    if let Some(ref mut pem_str) = pem {
+    if let Some(pem_str) = pem {
         embed_pem_from_map(pem_str, named_pems);
     }
 }
@@ -940,12 +940,14 @@ mod tests {
             let tls_config = tls_targets.get("example.com").unwrap();
             assert!(tls_config.cert.contains("BEGIN CERTIFICATE"));
             assert!(tls_config.key.contains("BEGIN PRIVATE KEY"));
-            assert!(tls_config
-                .client_ca_certs
-                .iter()
-                .next()
-                .unwrap()
-                .contains("BEGIN CERTIFICATE"));
+            assert!(
+                tls_config
+                    .client_ca_certs
+                    .iter()
+                    .next()
+                    .unwrap()
+                    .contains("BEGIN CERTIFICATE")
+            );
 
             // Check nested WebSocket -> VMess (no more nested certificates)
             if let ServerProxyConfig::Websocket { targets } = &tls_config.protocol {
@@ -972,29 +974,37 @@ mod tests {
                         if let ConfigSelection::Config(client_config) = client_selection {
                             // Check client QUIC settings
                             let client_quic = client_config.quic_settings.as_ref().unwrap();
-                            assert!(client_quic
-                                .cert
-                                .as_ref()
-                                .unwrap()
-                                .contains("BEGIN CERTIFICATE"));
-                            assert!(client_quic
-                                .key
-                                .as_ref()
-                                .unwrap()
-                                .contains("BEGIN PRIVATE KEY"));
-
-                            // Check client TLS settings
-                            if let ClientProxyConfig::Tls(tls_client) = &client_config.protocol {
-                                assert!(tls_client
+                            assert!(
+                                client_quic
                                     .cert
                                     .as_ref()
                                     .unwrap()
-                                    .contains("BEGIN CERTIFICATE"));
-                                assert!(tls_client
+                                    .contains("BEGIN CERTIFICATE")
+                            );
+                            assert!(
+                                client_quic
                                     .key
                                     .as_ref()
                                     .unwrap()
-                                    .contains("BEGIN PRIVATE KEY"));
+                                    .contains("BEGIN PRIVATE KEY")
+                            );
+
+                            // Check client TLS settings
+                            if let ClientProxyConfig::Tls(tls_client) = &client_config.protocol {
+                                assert!(
+                                    tls_client
+                                        .cert
+                                        .as_ref()
+                                        .unwrap()
+                                        .contains("BEGIN CERTIFICATE")
+                                );
+                                assert!(
+                                    tls_client
+                                        .key
+                                        .as_ref()
+                                        .unwrap()
+                                        .contains("BEGIN PRIVATE KEY")
+                                );
                             }
                         }
                     }

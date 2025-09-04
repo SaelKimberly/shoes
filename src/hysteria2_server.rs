@@ -571,16 +571,18 @@ async fn run_udp_local_to_remote_loop(
                             continue;
                         }
                     };
-                    let updated_socket_addr =
-                        match resolver_cache.resolve_location(&updated_location).await {
-                            Ok(s) => s,
-                            Err(e) => {
-                                error!(
+                    let updated_socket_addr = match resolver_cache
+                        .resolve_location(&updated_location)
+                        .await
+                    {
+                        Ok(s) => s,
+                        Err(e) => {
+                            error!(
                                 "Failed to resolve updated remote location {updated_location}: {e}"
                             );
-                                continue;
-                            }
-                        };
+                            continue;
+                        }
+                    };
                     session.last_location = updated_location;
                     session.last_socket_addr = updated_socket_addr;
                     updated_socket_addr

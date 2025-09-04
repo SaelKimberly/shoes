@@ -6,8 +6,8 @@
 /// - https://tls13.xargs.org/#client-hello/annotated
 use std::fmt::Debug;
 use std::io::Cursor;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use tokio::io::AsyncWriteExt;
 
@@ -141,7 +141,7 @@ pub async fn setup_shadowtls_server_stream(
             return Err(std::io::Error::new(
                 std::io::ErrorKind::InvalidData,
                 "client did not send a 32-byte session id",
-            ))
+            ));
         }
     };
 
@@ -553,12 +553,12 @@ pub fn parse_server_hello(server_hello_frame: &[u8]) -> std::io::Result<ParsedSe
             })?;
             if version_bytes[0] != 3 && version_bytes[1] != 4 {
                 return Err(std::io::Error::new(
-                        std::io::ErrorKind::InvalidData,
-                        format!(
-                            "expected server supported version to be TLS 1.3 (0x0304), got 0x{:02x}{:02x}",
-                            version_bytes[0], version_bytes[1]
-                        ),
-                    ));
+                    std::io::ErrorKind::InvalidData,
+                    format!(
+                        "expected server supported version to be TLS 1.3 (0x0304), got 0x{:02x}{:02x}",
+                        version_bytes[0], version_bytes[1]
+                    ),
+                ));
             }
             server_has_supported_version = true;
         } else {

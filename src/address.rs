@@ -70,7 +70,7 @@ impl Address {
 
     pub fn hostname(&self) -> Option<&str> {
         match self {
-            Address::Hostname(ref hostname) => Some(hostname),
+            Address::Hostname(hostname) => Some(hostname),
             _ => None,
         }
     }
@@ -209,7 +209,7 @@ impl NetLocationPortRange {
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
                     "Missing port specification",
-                ))
+                ));
             }
         };
 

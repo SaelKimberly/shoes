@@ -123,7 +123,7 @@ impl TcpClientHandler for ShadowTlsClientHandler {
                     Err(e) => {
                         return Err(std::io::Error::other(format!(
                             "rustls write_tls error: {e}"
-                        )))
+                        )));
                     }
                 }
                 continue;

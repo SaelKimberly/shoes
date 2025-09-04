@@ -10,8 +10,8 @@ use crate::client_proxy_selector::ClientProxySelector;
 use crate::option_util::NoneOrOne;
 use crate::resolver::{NativeResolver, Resolver};
 use crate::shadow_tls::{
-    feed_server_connection, read_client_hello, setup_shadowtls_server_stream, ParsedClientHello,
-    ShadowTlsServerTarget,
+    ParsedClientHello, ShadowTlsServerTarget, feed_server_connection, read_client_hello,
+    setup_shadowtls_server_stream,
 };
 use crate::tcp_client_connector::TcpClientConnector;
 use crate::tcp_handler::{
@@ -85,9 +85,9 @@ impl TcpServerHandler for TlsServerHandler {
 
         match target {
             TlsServerTarget::Tls {
-                ref server_config,
-                ref handler,
-                ref override_proxy_provider,
+                server_config,
+                handler,
+                override_proxy_provider,
             } => {
                 let ParsedClientHello {
                     client_hello_frame,
@@ -147,7 +147,7 @@ impl TcpServerHandler for TlsServerHandler {
 
                 target_setup_result
             }
-            TlsServerTarget::ShadowTls(ref target) => {
+            TlsServerTarget::ShadowTls(target) => {
                 setup_shadowtls_server_stream(
                     server_stream,
                     target,

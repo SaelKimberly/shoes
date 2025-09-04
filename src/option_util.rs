@@ -122,7 +122,7 @@ impl<T> NoneOrSome<T> {
     {
         match self {
             NoneOrSome::Unspecified | NoneOrSome::None => Box::new(std::iter::empty()),
-            NoneOrSome::One(ref mut item) => Box::new(SingleItemIter(Some(item))),
+            NoneOrSome::One(item) => Box::new(SingleItemIter(Some(item))),
             NoneOrSome::Some(v) => Box::new(v.iter_mut()),
         }
     }
@@ -220,7 +220,7 @@ impl<T> OneOrSome<T> {
         T: Send,
     {
         match self {
-            OneOrSome::One(ref mut item) => Box::new(SingleItemIter(Some(item))),
+            OneOrSome::One(item) => Box::new(SingleItemIter(Some(item))),
             OneOrSome::Some(v) => Box::new(v.iter_mut()),
         }
     }

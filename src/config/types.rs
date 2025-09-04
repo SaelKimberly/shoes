@@ -643,7 +643,7 @@ impl<T> ConfigSelection<T> {
 
     pub fn unwrap_config_mut(&mut self) -> &mut T {
         match self {
-            ConfigSelection::Config(ref mut config) => config,
+            ConfigSelection::Config(config) => config,
             ConfigSelection::GroupName(_) => {
                 panic!("Tried to unwrap a ConfigSelection::GroupName");
             }
@@ -2005,10 +2005,12 @@ mod tests {
         "#;
         let result: Result<NamedPem, _> = serde_yaml::from_str(yaml);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("missing field `pem`"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("missing field `pem`")
+        );
 
         // Missing source (no path or data)
         let yaml = r#"
@@ -2016,10 +2018,12 @@ mod tests {
         "#;
         let result: Result<NamedPem, _> = serde_yaml::from_str(yaml);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("must have either 'path' or 'data'"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("must have either 'path' or 'data'")
+        );
 
         // Both path and data
         let yaml = r#"
@@ -2029,10 +2033,12 @@ mod tests {
         "#;
         let result: Result<NamedPem, _> = serde_yaml::from_str(yaml);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("cannot have both 'path' and 'data'"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("cannot have both 'path' and 'data'")
+        );
     }
 
     #[tokio::test]
@@ -2176,10 +2182,12 @@ mod tests {
 
         let result = validate_configs_test(configs).await;
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("named pem already exists: duplicate-name"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("named pem already exists: duplicate-name")
+        );
     }
 
     #[tokio::test]

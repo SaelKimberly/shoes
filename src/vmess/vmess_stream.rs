@@ -1,7 +1,7 @@
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use aws_lc_rs::aead::{Aad, BoundKey, OpeningKey, SealingKey, UnboundKey, AES_128_GCM};
+use aws_lc_rs::aead::{AES_128_GCM, Aad, BoundKey, OpeningKey, SealingKey, UnboundKey};
 use digest::XofReader;
 use futures::ready;
 use log::warn;

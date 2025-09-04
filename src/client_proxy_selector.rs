@@ -1,12 +1,12 @@
 use log::{debug, error};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU32, Ordering};
 
 use crate::address::{Address, NetLocation};
 use crate::address::{AddressMask, NetLocationMask};
 use crate::option_util::OneOrSome;
-use crate::resolver::{resolve_single_address, Resolver};
+use crate::resolver::{Resolver, resolve_single_address};
 
 // If a hostname is provided in a rule, it won't be resolved,
 // and the netmask field will be ignored.

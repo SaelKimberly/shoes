@@ -2,18 +2,18 @@ use std::collections::HashMap;
 use std::net::{Ipv4Addr, Ipv6Addr};
 use std::time::SystemTime;
 
-use aes::cipher::{BlockDecrypt, BlockEncrypt, KeyIvInit};
 use aes::Aes128;
+use aes::cipher::{BlockDecrypt, BlockEncrypt, KeyIvInit};
 use async_trait::async_trait;
 use aws_lc_rs::aead::{
-    Aad, BoundKey, OpeningKey, SealingKey, UnboundKey, AES_128_GCM, CHACHA20_POLY1305,
+    AES_128_GCM, Aad, BoundKey, CHACHA20_POLY1305, OpeningKey, SealingKey, UnboundKey,
 };
 use cfb_mode::cipher::AsyncStreamCipher;
 use digest::KeyInit;
 use parking_lot::Mutex;
 use rand::{Rng, RngCore};
-use sha3::digest::{ExtendableOutput, Update};
 use sha3::Shake128;
+use sha3::digest::{ExtendableOutput, Update};
 use tokio::io::AsyncWriteExt;
 
 use super::fnv1a::Fnv1aHasher;
@@ -658,10 +658,8 @@ impl HeaderReader {
         data: &mut [u8],
     ) -> std::io::Result<()> {
         match self {
-            HeaderReader::AesCfb(ref mut reader) => {
-                reader.read_slice_into(stream_reader, data).await
-            }
-            HeaderReader::Aead(ref mut reader) => reader.read_slice_into(data),
+            HeaderReader::AesCfb(reader) => reader.read_slice_into(stream_reader, data).await,
+            HeaderReader::Aead(reader) => reader.read_slice_into(data),
         }
     }
 

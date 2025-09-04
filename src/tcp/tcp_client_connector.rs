@@ -1,5 +1,5 @@
-use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU8, Ordering};
 
 use log::{debug, error};
 
@@ -7,7 +7,7 @@ use crate::address::NetLocation;
 use crate::async_stream::AsyncStream;
 use crate::config::{ClientConfig, ClientQuicConfig, TcpConfig, Transport};
 use crate::quic_stream::QuicStream;
-use crate::resolver::{resolve_single_address, Resolver};
+use crate::resolver::{Resolver, resolve_single_address};
 use crate::rustls_util::create_client_config;
 use crate::socket_util::{new_reuse_udp_sockets, new_tcp_socket, new_udp_socket};
 use crate::tcp_handler::{TcpClientHandler, TcpClientSetupResult};
@@ -156,7 +156,9 @@ impl TcpClientConnector {
                 TransportConfig::Tcp { no_delay }
             }
             _ => {
-                panic!("TODO: this is an error, a non-tcp/quic client config was specified for a tcp server");
+                panic!(
+                    "TODO: this is an error, a non-tcp/quic client config was specified for a tcp server"
+                );
             }
         };
 

@@ -15,7 +15,7 @@ use crate::config::{BindLocation, ConfigSelection, ServerConfig, TcpConfig};
 use crate::copy_bidirectional::copy_bidirectional;
 use crate::copy_bidirectional_message::copy_bidirectional_message;
 use crate::copy_multidirectional_message::copy_multidirectional_message;
-use crate::resolver::{resolve_single_address, NativeResolver, Resolver};
+use crate::resolver::{NativeResolver, Resolver, resolve_single_address};
 use crate::tcp_client_connector::TcpClientConnector;
 use crate::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
 use crate::tcp_handler_util::{create_tcp_client_proxy_selector, create_tcp_server_handler};
@@ -315,7 +315,9 @@ where
                     Ok(())
                 }
                 ConnectDecision::Block => {
-                    warn!("Blocked multidirectional udp forward, because the default action is to block.");
+                    warn!(
+                        "Blocked multidirectional udp forward, because the default action is to block."
+                    );
                     // TODO: add async trait ext and make this work
                     // let _ = server_stream.shutdown_message().await;
                     Ok(())

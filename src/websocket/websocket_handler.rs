@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use aws_lc_rs::digest::{digest, SHA1_FOR_LEGACY_USE_ONLY};
-use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
+use aws_lc_rs::digest::{SHA1_FOR_LEGACY_USE_ONLY, digest};
+use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use rustc_hash::FxHashMap;
 use tokio::io::AsyncWriteExt;
 
