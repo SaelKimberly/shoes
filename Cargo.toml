@@ -70,7 +70,7 @@ base64 = { version = "^0.22" }
 bytes = { version = "^1.10" }
 dashmap = { version = "^6.1" }
 rand = { version = "^0.9" }
-percent-encoding = { version = "^2.3" }
+clap = { version = "^4.5" }
 memchr = { version = "^2.7" }
 notify = { version = "^8.2" }
 parking_lot = { version = "^0.12" }

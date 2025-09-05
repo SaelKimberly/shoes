@@ -36,6 +36,7 @@ mod vless_message_stream;
 mod vmess;
 mod websocket;
 
+use clap::Arg;
 #[cfg(not(target_env = "msvc"))]
 use tikv_jemallocator::Jemalloc;
 
@@ -44,7 +45,8 @@ use tikv_jemallocator::Jemalloc;
 static GLOBAL: Jemalloc = Jemalloc;
 
 use std::io::Write;
-use std::path::Path;
+use std::path::PathBuf;
+use std::str::FromStr;
 
 use log::debug;
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
@@ -62,7 +64,7 @@ use tcp::*;
 struct ConfigChanged;
 
 fn start_notify_thread(
-    config_paths: Vec<String>,
+    config_paths: Vec<PathBuf>,
 ) -> (RecommendedWatcher, UnboundedReceiver<ConfigChanged>) {
     let (tx, rx) = unbounded_channel();
 
@@ -78,7 +80,7 @@ fn start_notify_thread(
 
     for config_path in config_paths {
         watcher
-            .watch(Path::new(&config_path), RecursiveMode::NonRecursive)
+            .watch(config_path.as_path(), RecursiveMode::NonRecursive)
             .unwrap();
     }
 
@@ -124,13 +126,6 @@ async fn start_servers(config: ServerConfig) -> std::io::Result<Vec<JoinHandle<(
     Ok(join_handles)
 }
 
-fn print_usage_and_exit(arg0: String) {
-    eprintln!(
-        "Usage: {arg0} [--threads/-t N] <server uri or config filename> [server uri or config filename] [..]"
-    );
-    std::process::exit(1);
-}
-
 fn main() {
     env_logger::builder()
         .format(|buf, record| {
@@ -158,57 +153,53 @@ fn main() {
         })
         .init();
 
-    let mut args: Vec<String> = std::env::args().collect();
-    let arg0 = args.remove(0);
-    let mut num_threads = 0usize;
-    let mut dry_run = false;
+    let mut cmd = clap::builder::Command::new("shoes").arg(
+        Arg::new("threads").short('t').long("threads").value_name("N").value_parser(clap::value_parser!(usize)).help(
+            "Set the number of worker threads. This usually defaults to the number of CPUs.",
+        )
+    ).arg(
+        Arg::new("dry-run").short('d').long("dry-run").help("Do not start any servers.")
+    ).arg(
+        Arg::new("config").required(true).value_parser(clap::value_parser!(PathBuf)).num_args(1..).value_name("server uri or config filename").help("Path to a YAML config file.")
+    );
+    cmd.build();
 
-    while !args.is_empty() && args[0].starts_with("-") {
-        if args[0] == "--threads" || args[0] == "-t" {
-            args.remove(0);
-            if args.is_empty() {
-                eprintln!("Missing threads argument.");
-                print_usage_and_exit(arg0);
-                return;
-            }
-            num_threads = match args.remove(0).parse::<usize>() {
-                Ok(n) => n,
-                Err(e) => {
-                    eprintln!("Invalid thread count: {e}");
-                    print_usage_and_exit(arg0);
-                    return;
-                }
-            };
-        } else if args[0] == "--dry-run" || args[0] == "-d" {
-            args.remove(0);
-            dry_run = true;
-        } else {
-            eprintln!("Invalid argument: {}", args[0]);
-            print_usage_and_exit(arg0);
-            return;
-        }
-    }
+    let args = cmd.clone().get_matches();
+    println!("Args: {args:#?}");
 
-    if args.is_empty() {
+    let mut config_paths: Vec<PathBuf> = args
+        .get_many::<PathBuf>("config")
+        .unwrap()
+        .cloned()
+        .collect();
+
+    let num_threads = args.get_one::<usize>("threads").unwrap_or(&0).to_owned();
+    let dry_run = args.get_flag("dry-run");
+
+    if config_paths.is_empty() {
         println!("No config specified, assuming loading from file config.shoes.yaml");
-        args.push("config.shoes.yaml".to_string())
+        config_paths.push(PathBuf::from_str("config.shoes.yaml").unwrap());
     }
 
     if dry_run {
         println!("Starting dry run.");
     }
 
-    if num_threads == 0 {
-        num_threads = std::cmp::max(
-            2,
-            std::thread::available_parallelism()
-                .map(|n| n.get())
-                .unwrap_or(1),
-        );
-        debug!("Runtime threads: {num_threads}");
-    } else {
-        println!("Using custom thread count ({num_threads})");
-    }
+    let max_threads = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1);
+
+    let num_threads = match num_threads {
+        0 => std::cmp::max(2, max_threads),
+        _ => {
+            if num_threads > max_threads {
+                max_threads
+            } else {
+                num_threads
+            }
+        }
+    };
+    debug!("Runtime threads: {num_threads}");
 
     // Used by QUIC to figure out the number of endpoints.
     // TODO: can we pass it in instead?
@@ -229,14 +220,14 @@ fn main() {
         .expect("Could not build tokio runtime");
 
     runtime.block_on(async move {
-        let (_watcher, mut config_rx) = start_notify_thread(args.clone());
+        let (_watcher, mut config_rx) = start_notify_thread(config_paths.clone());
 
         loop {
-            let configs = match config::load_configs(&args).await {
+            let configs = match config::load_configs(&config_paths).await {
                 Ok(c) => c,
                 Err(e) => {
                     eprintln!("Failed to load server configs: {e}\n");
-                    print_usage_and_exit(arg0);
+                    cmd.clone().print_help().unwrap();
                     return;
                 }
             };
@@ -245,7 +236,7 @@ fn main() {
                 Ok(c) => c,
                 Err(e) => {
                     eprintln!("Failed to load cert files: {e}\n");
-                    print_usage_and_exit(arg0);
+                    cmd.clone().print_help().unwrap();
                     return;
                 }
             };
@@ -277,7 +268,7 @@ fn main() {
                 Ok(c) => c,
                 Err(e) => {
                     eprintln!("Failed to create server configs: {e}\n");
-                    print_usage_and_exit(arg0);
+                    cmd.clone().print_help().unwrap();
                     return;
                 }
             };

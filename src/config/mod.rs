@@ -14,7 +14,7 @@ use crate::util::parse_uuid;
 
 const MIN_TLS_BUFFER_SIZE: usize = 16 * 1024;
 
-pub async fn load_configs(args: &Vec<String>) -> std::io::Result<Vec<Config>> {
+pub(crate) async fn load_configs(args: &Vec<PathBuf>) -> std::io::Result<Vec<Config>> {
     let mut all_configs = vec![];
     for config_filename in args {
         let config_bytes = match tokio::fs::read(config_filename).await {
@@ -22,7 +22,7 @@ pub async fn load_configs(args: &Vec<String>) -> std::io::Result<Vec<Config>> {
             Err(e) => {
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
-                    format!("Could not read config file {config_filename}: {e}"),
+                    format!("Could not read config file {config_filename:?}: {e}"),
                 ));
             }
         };
@@ -32,7 +32,7 @@ pub async fn load_configs(args: &Vec<String>) -> std::io::Result<Vec<Config>> {
             Err(e) => {
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
-                    format!("Could not parse config file {config_filename} as UTF8: {e}"),
+                    format!("Could not parse config file {config_filename:?} as UTF8: {e}"),
                 ));
             }
         };
@@ -42,7 +42,7 @@ pub async fn load_configs(args: &Vec<String>) -> std::io::Result<Vec<Config>> {
             Err(e) => {
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
-                    format!("Could not parse config file {config_filename} as config YAML: {e}"),
+                    format!("Could not parse config file {config_filename:?} as config YAML: {e}"),
                 ));
             }
         };
@@ -52,7 +52,9 @@ pub async fn load_configs(args: &Vec<String>) -> std::io::Result<Vec<Config>> {
     Ok(all_configs)
 }
 
-pub async fn convert_cert_paths(all_configs: Vec<Config>) -> std::io::Result<(Vec<Config>, usize)> {
+pub(crate) async fn convert_cert_paths(
+all_configs: Vec<Config>,
+) -> std::io::Result<(Vec<Config>, usize)> {
     // this converts configs by removing all file references:
     // - all named pems that point to a file are loaded into a data-backed pem
     // - all inline file paths in cert or key fields are loaded into new named pem items
@@ -129,7 +131,9 @@ pub async fn convert_cert_paths(all_configs: Vec<Config>) -> std::io::Result<(Ve
     Ok((updated_configs, load_count))
 }
 
-pub async fn create_server_configs(all_configs: Vec<Config>) -> std::io::Result<Vec<ServerConfig>> {
+pub(crate) async fn create_server_configs(
+all_configs: Vec<Config>,
+) -> std::io::Result<Vec<ServerConfig>> {
     let mut client_groups: HashMap<String, Vec<ClientConfig>> = HashMap::new();
     client_groups.insert(String::from("direct"), vec![ClientConfig::default()]);
 
