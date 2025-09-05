@@ -6,13 +6,13 @@ use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 
 use crate::async_stream::{AsyncPing, AsyncStream};
 
-pub struct QuicStream {
+pub(crate) struct QuicStream {
     send_stream: SendStream,
     recv_stream: RecvStream,
 }
 
 impl QuicStream {
-    pub fn from(send_stream: quinn::SendStream, recv_stream: quinn::RecvStream) -> Self {
+    pub(crate) fn from(send_stream: quinn::SendStream, recv_stream: quinn::RecvStream) -> Self {
         Self {
             send_stream,
             recv_stream,

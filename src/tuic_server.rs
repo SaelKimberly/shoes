@@ -21,8 +21,8 @@ use crate::quic_stream::QuicStream;
 use crate::resolver::{Resolver, resolve_single_address};
 use crate::socket_util::new_socket2_udp_socket;
 use crate::stream_reader::StreamReader;
-use crate::tcp_client_connector::TcpClientConnector;
-use crate::tcp_server::setup_client_stream;
+use crate::tcp::tcp_client_connector::TcpClientConnector;
+use crate::tcp::tcp_server::setup_client_stream;
 
 const COMMAND_TYPE_AUTHENTICATE: u8 = 0x00;
 const COMMAND_TYPE_CONNECT: u8 = 0x01;
@@ -1159,7 +1159,7 @@ async fn run_datagram_loop(
     }
 }
 
-pub async fn start_tuic_server(
+pub(crate) async fn start_tuic_server(
     bind_address: SocketAddr,
     quic_server_config: Arc<quinn::crypto::rustls::QuicServerConfig>,
     uuid: &'static [u8],

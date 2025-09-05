@@ -20,19 +20,19 @@ use crate::resolver::{Resolver, resolve_single_address};
 const DONT_RESOLVE_RULE_HOSTNAMES: bool = true;
 
 #[derive(Debug)]
-pub struct ConnectRule<T> {
-    pub masks: Vec<NetLocationMask>,
-    pub action: ConnectAction<T>,
+pub(crate) struct ConnectRule<T> {
+    pub(crate) masks: Vec<NetLocationMask>,
+    pub(crate) action: ConnectAction<T>,
 }
 
 impl<T> ConnectRule<T> {
-    pub fn new(masks: Vec<NetLocationMask>, action: ConnectAction<T>) -> Self {
+    pub(crate) fn new(masks: Vec<NetLocationMask>, action: ConnectAction<T>) -> Self {
         Self { masks, action }
     }
 }
 
 #[derive(Debug)]
-pub enum ConnectAction<T> {
+pub(crate) enum ConnectAction<T> {
     Allow {
         override_address: Option<NetLocation>,
         client_proxies: OneOrSome<T>,
@@ -42,7 +42,10 @@ pub enum ConnectAction<T> {
 }
 
 impl<T> ConnectAction<T> {
-    pub fn new_allow(override_address: Option<NetLocation>, client_proxies: OneOrSome<T>) -> Self {
+    pub(crate) fn new_allow(
+        override_address: Option<NetLocation>,
+        client_proxies: OneOrSome<T>,
+    ) -> Self {
         ConnectAction::Allow {
             override_address,
             client_proxies,
@@ -50,11 +53,11 @@ impl<T> ConnectAction<T> {
         }
     }
 
-    pub fn new_block() -> Self {
+    pub(crate) fn new_block() -> Self {
         ConnectAction::Block
     }
 
-    pub fn to_decision(&self, target_location: NetLocation) -> ConnectDecision<'_, T> {
+    pub(crate) fn to_decision(&self, target_location: NetLocation) -> ConnectDecision<'_, T> {
         match self {
             ConnectAction::Allow {
                 override_address,
@@ -88,7 +91,7 @@ impl<T> ConnectAction<T> {
 }
 
 #[derive(Debug)]
-pub struct ClientProxySelector<T> {
+pub(crate) struct ClientProxySelector<T> {
     rules: Vec<ConnectRule<T>>,
     default_rule_index: Option<usize>,
 }
@@ -96,7 +99,7 @@ pub struct ClientProxySelector<T> {
 unsafe impl<T: Send> Send for ClientProxySelector<T> {}
 
 #[derive(Debug)]
-pub enum ConnectDecision<'a, T> {
+pub(crate) enum ConnectDecision<'a, T> {
     Allow {
         client_proxy: &'a T,
         remote_location: NetLocation,
@@ -105,7 +108,7 @@ pub enum ConnectDecision<'a, T> {
 }
 
 impl<T> ClientProxySelector<T> {
-    pub fn new(rules: Vec<ConnectRule<T>>) -> Self {
+    pub(crate) fn new(rules: Vec<ConnectRule<T>>) -> Self {
         let mut default_rule_index: Option<usize> = None;
         // find a default rule which we'll use for multidirectional forwarding..
         // TODO: ideally, we'd check the rule for each target during multidirectional forwarding
@@ -133,7 +136,7 @@ impl<T> ClientProxySelector<T> {
         }
     }
 
-    pub fn default_decision(&self) -> ConnectDecision<'_, T> {
+    pub(crate) fn default_decision(&self) -> ConnectDecision<'_, T> {
         match self.default_rule_index {
             Some(i) => {
                 let rule = &self.rules[i];
@@ -145,7 +148,7 @@ impl<T> ClientProxySelector<T> {
         }
     }
 
-    pub async fn judge<'a>(
+    pub(crate) async fn judge<'a>(
         &'a self,
         location: NetLocation,
         resolver: &Arc<dyn Resolver>,

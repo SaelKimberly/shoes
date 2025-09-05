@@ -7,7 +7,7 @@ use crate::address::{Address, NetLocation};
 use crate::async_stream::AsyncStream;
 use crate::option_util::NoneOrOne;
 use crate::stream_reader::StreamReader;
-use crate::tcp_handler::{
+use crate::tcp::tcp_handler::{
     TcpClientHandler, TcpClientSetupResult, TcpServerHandler, TcpServerSetupResult,
 };
 
@@ -20,7 +20,7 @@ fn create_http_auth_token(username: &str, password: &str) -> String {
 }
 
 #[derive(Debug)]
-pub struct HttpTcpServerHandler {
+pub(crate) struct HttpTcpServerHandler {
     auth_token: Option<String>,
 }
 
@@ -28,7 +28,7 @@ unsafe impl Send for HttpTcpServerHandler {}
 unsafe impl Sync for HttpTcpServerHandler {}
 
 impl HttpTcpServerHandler {
-    pub fn new(auth_credentials: Option<(String, String)>) -> Self {
+    pub(crate) fn new(auth_credentials: Option<(String, String)>) -> Self {
         let auth_token = auth_credentials
             .map(|(username, password)| create_http_auth_token(&username, &password));
         Self { auth_token }
@@ -289,12 +289,12 @@ fn create_http_auth_header_line(username: &str, password: &str) -> String {
 }
 
 #[derive(Debug)]
-pub struct HttpTcpClientHandler {
+pub(crate) struct HttpTcpClientHandler {
     auth_header: Option<String>,
 }
 
 impl HttpTcpClientHandler {
-    pub fn new(auth_credentials: Option<(String, String)>) -> Self {
+    pub(crate) fn new(auth_credentials: Option<(String, String)>) -> Self {
         let auth_header = auth_credentials
             .map(|(username, password)| create_http_auth_header_line(&username, &password));
         Self { auth_header }

@@ -10,7 +10,7 @@ use crate::async_stream::{
     AsyncShutdownMessage, AsyncTargetedMessageStream, AsyncWriteMessage, AsyncWriteSourcedMessage,
 };
 
-pub struct SnellUdpStream {
+pub(crate) struct SnellUdpStream {
     stream: Box<dyn AsyncMessageStream>,
     max_payload_size: usize,
 
@@ -23,7 +23,7 @@ pub struct SnellUdpStream {
 }
 
 impl SnellUdpStream {
-    pub fn new(stream: Box<dyn AsyncMessageStream>, max_payload_size: usize) -> Self {
+    pub(crate) fn new(stream: Box<dyn AsyncMessageStream>, max_payload_size: usize) -> Self {
         Self {
             stream,
             max_payload_size,

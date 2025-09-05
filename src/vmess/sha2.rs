@@ -100,7 +100,7 @@ impl VmessHash for RecursiveHash {
     }
 }
 
-pub fn kdf(key: &[u8], path: &[&[u8]]) -> [u8; 32] {
+pub(crate) fn kdf(key: &[u8], path: &[&[u8]]) -> [u8; 32] {
     let mut current = Box::new(RecursiveHash::create(
         b"VMess AEAD KDF",
         Box::new(Sha256Hash::create()),
@@ -112,7 +112,7 @@ pub fn kdf(key: &[u8], path: &[&[u8]]) -> [u8; 32] {
     current.finalize()
 }
 
-pub fn compute_sha256(data: &[u8]) -> [u8; 32] {
+pub(crate) fn compute_sha256(data: &[u8]) -> [u8; 32] {
     let mut out = [0u8; 32];
     out.copy_from_slice(aws_lc_rs::digest::digest(&SHA256, data).as_ref());
     out

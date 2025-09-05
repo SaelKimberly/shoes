@@ -13,7 +13,7 @@ use crate::shadowsocks::{
     ShadowsocksCipher, ShadowsocksKey, ShadowsocksStream, ShadowsocksStreamType,
 };
 use crate::stream_reader::StreamReader;
-use crate::tcp_handler::{
+use crate::tcp::tcp_handler::{
     TcpClientHandler, TcpClientSetupResult, TcpServerHandler, TcpServerSetupResult,
 };
 use crate::util::{allocate_vec, write_all};
@@ -25,7 +25,7 @@ struct SnellKey {
 }
 
 impl SnellKey {
-    pub fn new(password: &str, key_len: usize) -> Self {
+    pub(crate) fn new(password: &str, key_len: usize) -> Self {
         Self {
             password_bytes: password.as_bytes().to_vec().into_boxed_slice(),
             key_len,
@@ -57,7 +57,7 @@ impl ShadowsocksKey for SnellKey {
 }
 
 #[derive(Debug)]
-pub struct SnellServerHandler {
+pub(crate) struct SnellServerHandler {
     cipher: ShadowsocksCipher,
     key: Arc<Box<dyn ShadowsocksKey>>,
     udp_enabled: bool,
@@ -65,7 +65,7 @@ pub struct SnellServerHandler {
 }
 
 impl SnellServerHandler {
-    pub fn new(
+    pub(crate) fn new(
         cipher_name: &str,
         password: &str,
         udp_enabled: bool,
@@ -199,13 +199,13 @@ impl TcpServerHandler for SnellServerHandler {
 }
 
 #[derive(Debug)]
-pub struct SnellClientHandler {
+pub(crate) struct SnellClientHandler {
     cipher: ShadowsocksCipher,
     key: Arc<Box<dyn ShadowsocksKey>>,
 }
 
 impl SnellClientHandler {
-    pub fn new(cipher_name: &str, password: &str) -> Self {
+    pub(crate) fn new(cipher_name: &str, password: &str) -> Self {
         let cipher: ShadowsocksCipher = cipher_name.into();
         let key: Arc<Box<dyn ShadowsocksKey>> = Arc::new(Box::new(SnellKey::new(
             password,

@@ -23,8 +23,8 @@ use crate::quic_stream::QuicStream;
 use crate::resolver::{Resolver, ResolverCache};
 use crate::socket_util::new_socket2_udp_socket;
 use crate::stream_reader::StreamReader;
-use crate::tcp_client_connector::TcpClientConnector;
-use crate::tcp_server::setup_client_stream;
+use crate::tcp::tcp_client_connector::TcpClientConnector;
+use crate::tcp::tcp_server::setup_client_stream;
 use crate::util::allocate_vec;
 
 async fn process_connection(
@@ -837,7 +837,7 @@ async fn read_varint(
     Ok(value)
 }
 
-pub async fn start_hysteria2_server(
+pub(crate) async fn start_hysteria2_server(
     bind_address: SocketAddr,
     quic_server_config: Arc<quinn::crypto::rustls::QuicServerConfig>,
     hysteria2_password: &'static str,

@@ -1,13 +1,13 @@
 use aws_lc_rs::aead::{Nonce, NonceSequence};
 use aws_lc_rs::error::Unspecified;
 
-pub struct VmessNonceSequence {
+pub(crate) struct VmessNonceSequence {
     count: u16,
     nonce: [u8; 12],
 }
 
 impl VmessNonceSequence {
-    pub fn new(data: &[u8]) -> Self {
+    pub(crate) fn new(data: &[u8]) -> Self {
         let mut nonce = [0u8; 12];
         nonce[2..].copy_from_slice(&data[2..12]);
         Self { count: 0, nonce }
@@ -26,13 +26,13 @@ impl NonceSequence for VmessNonceSequence {
     }
 }
 
-pub struct SingleUseNonce {
+pub(crate) struct SingleUseNonce {
     nonce: [u8; 12],
     used: bool,
 }
 
 impl SingleUseNonce {
-    pub fn new(data: &[u8]) -> Self {
+    pub(crate) fn new(data: &[u8]) -> Self {
         let mut nonce = [0u8; 12];
         nonce.copy_from_slice(data);
         Self { nonce, used: false }

@@ -59,7 +59,7 @@ impl<T> NoneOrSome<T> {
         matches!(self, NoneOrSome::Unspecified)
     }
 
-    pub fn _as_option(&self) -> Option<Vec<&T>> {
+    pub(crate) fn _as_option(&self) -> Option<Vec<&T>> {
         match self {
             NoneOrSome::Unspecified => None,
             NoneOrSome::None => Some(vec![]),
@@ -68,7 +68,7 @@ impl<T> NoneOrSome<T> {
         }
     }
 
-    pub fn _into_option(self) -> Option<Vec<T>> {
+    pub(crate) fn _into_option(self) -> Option<Vec<T>> {
         match self {
             NoneOrSome::Unspecified => None,
             NoneOrSome::None => Some(vec![]),
@@ -94,6 +94,7 @@ impl<T> NoneOrSome<T> {
         }
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn into_iter(self) -> Box<dyn Iterator<Item = T> + Send>
     where
         T: Send + 'static,
@@ -148,7 +149,7 @@ impl<T> NoneOrSome<T> {
         }
     }
 
-    pub fn _filter<F>(self, f: F) -> Self
+    pub(crate) fn _filter<F>(self, f: F) -> Self
     where
         F: Fn(&T) -> bool,
     {
@@ -235,7 +236,7 @@ impl<T> OneOrSome<T> {
         }
     }
 
-    pub fn _contains(&self, x: &T) -> bool
+    pub(crate) fn _contains(&self, x: &T) -> bool
     where
         T: PartialEq,
     {

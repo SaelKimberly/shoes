@@ -10,7 +10,7 @@ use tokio::net::UnixStream;
 
 use crate::address::NetLocation;
 
-pub trait AsyncPing {
+pub(crate) trait AsyncPing {
     fn supports_ping(&self) -> bool;
 
     // Write a ping message to the stream, if supported.
@@ -19,7 +19,7 @@ pub trait AsyncPing {
     fn poll_write_ping(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<std::io::Result<bool>>;
 }
 
-pub trait AsyncReadMessage {
+pub(crate) trait AsyncReadMessage {
     fn poll_read_message(
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
@@ -27,7 +27,7 @@ pub trait AsyncReadMessage {
     ) -> Poll<std::io::Result<()>>;
 }
 
-pub trait AsyncWriteMessage {
+pub(crate) trait AsyncWriteMessage {
     fn poll_write_message(
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
@@ -35,18 +35,18 @@ pub trait AsyncWriteMessage {
     ) -> Poll<std::io::Result<()>>;
 }
 
-pub trait AsyncFlushMessage {
+pub(crate) trait AsyncFlushMessage {
     fn poll_flush_message(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<std::io::Result<()>>;
 }
 
-pub trait AsyncShutdownMessage {
+pub(crate) trait AsyncShutdownMessage {
     fn poll_shutdown_message(
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
     ) -> Poll<std::io::Result<()>>;
 }
 
-pub trait AsyncReadTargetedMessage {
+pub(crate) trait AsyncReadTargetedMessage {
     fn poll_read_targeted_message(
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
@@ -54,7 +54,7 @@ pub trait AsyncReadTargetedMessage {
     ) -> Poll<std::io::Result<NetLocation>>;
 }
 
-pub trait AsyncWriteTargetedMessage {
+pub(crate) trait AsyncWriteTargetedMessage {
     fn poll_write_targeted_message(
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
@@ -63,7 +63,7 @@ pub trait AsyncWriteTargetedMessage {
     ) -> Poll<std::io::Result<()>>;
 }
 
-pub trait AsyncReadSourcedMessage {
+pub(crate) trait AsyncReadSourcedMessage {
     fn poll_read_sourced_message(
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
@@ -71,7 +71,7 @@ pub trait AsyncReadSourcedMessage {
     ) -> Poll<std::io::Result<SocketAddr>>;
 }
 
-pub trait AsyncWriteSourcedMessage {
+pub(crate) trait AsyncWriteSourcedMessage {
     fn poll_write_sourced_message(
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
@@ -119,9 +119,9 @@ impl AsyncShutdownMessage for UdpSocket {
     }
 }
 
-pub trait AsyncStream: AsyncRead + AsyncWrite + AsyncPing + Unpin + Send {}
+pub(crate) trait AsyncStream: AsyncRead + AsyncWrite + AsyncPing + Unpin + Send {}
 
-pub trait AsyncMessageStream:
+pub(crate) trait AsyncMessageStream:
     AsyncReadMessage
     + AsyncWriteMessage
     + AsyncFlushMessage
@@ -134,7 +134,7 @@ pub trait AsyncMessageStream:
 
 /// Server stream trait connected to proxy clients, where received messages have a target address,
 /// and we write forwarded messages along with the source address we received them from.
-pub trait AsyncTargetedMessageStream:
+pub(crate) trait AsyncTargetedMessageStream:
     AsyncReadTargetedMessage
     + AsyncWriteSourcedMessage
     + AsyncFlushMessage
@@ -147,7 +147,7 @@ pub trait AsyncTargetedMessageStream:
 
 /// Client stream trait connected directly to targets or to proxy servers, where received messages
 /// come with a source address, and we write where we want messages to be sent.
-pub trait AsyncSourcedMessageStream:
+pub(crate) trait AsyncSourcedMessageStream:
     AsyncReadSourcedMessage
     + AsyncWriteTargetedMessage
     + AsyncFlushMessage

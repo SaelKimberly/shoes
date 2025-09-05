@@ -1,2 +1,2 @@
-pub mod snell_handler;
-pub mod snell_udp_stream;
+pub(crate) mod snell_handler;
+pub(crate) mod snell_udp_stream;

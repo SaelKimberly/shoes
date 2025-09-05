@@ -21,8 +21,8 @@ use crate::noop_stream::NoopStream;
 use crate::option_util::NoneOrOne;
 use crate::resolver::Resolver;
 use crate::stream_reader::StreamReader;
-use crate::tcp_client_connector::TcpClientConnector;
-use crate::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
+use crate::tcp::tcp_client_connector::TcpClientConnector;
+use crate::tcp::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
 use crate::util::{allocate_vec, write_all};
 
 // context wrapper because it's not Debug
@@ -35,7 +35,7 @@ impl Debug for ShadowTlsXorContext {
 }
 
 #[derive(Debug)]
-pub struct ShadowTlsServerTarget {
+pub(crate) struct ShadowTlsServerTarget {
     initial_hmac: ShadowTlsHmac,
     initial_xor_context: ShadowTlsXorContext,
     handshake: ShadowTlsServerTargetHandshake,
@@ -44,7 +44,7 @@ pub struct ShadowTlsServerTarget {
 }
 
 impl ShadowTlsServerTarget {
-    pub fn new(
+    pub(crate) fn new(
         password: String,
         handshake: ShadowTlsServerTargetHandshake,
         handler: Box<dyn TcpServerHandler>,
@@ -69,7 +69,7 @@ impl ShadowTlsServerTarget {
 }
 
 #[derive(Debug)]
-pub enum ShadowTlsServerTargetHandshake {
+pub(crate) enum ShadowTlsServerTargetHandshake {
     Local(Arc<rustls::ServerConfig>),
     Remote {
         location: NetLocation,
@@ -79,11 +79,14 @@ pub enum ShadowTlsServerTargetHandshake {
 }
 
 impl ShadowTlsServerTargetHandshake {
-    pub fn new_local(server_config: Arc<rustls::ServerConfig>) -> Self {
+    pub(crate) fn new_local(server_config: Arc<rustls::ServerConfig>) -> Self {
         ShadowTlsServerTargetHandshake::Local(server_config)
     }
 
-    pub fn new_remote(location: NetLocation, client_connectors: Vec<TcpClientConnector>) -> Self {
+    pub(crate) fn new_remote(
+        location: NetLocation,
+        client_connectors: Vec<TcpClientConnector>,
+    ) -> Self {
         ShadowTlsServerTargetHandshake::Remote {
             location,
             client_connectors,
@@ -113,7 +116,7 @@ const RETRY_REQUEST_RANDOM_BYTES: [u8; 32] = [
 ];
 
 #[inline]
-pub async fn setup_shadowtls_server_stream(
+pub(crate) async fn setup_shadowtls_server_stream(
     server_stream: Box<dyn AsyncStream>,
     target: &ShadowTlsServerTarget,
     parsed_client_hello: ParsedClientHello,
@@ -241,26 +244,26 @@ pub async fn setup_shadowtls_server_stream(
     target_setup_result
 }
 
-pub struct ParsedClientHello {
-    pub client_hello_frame: Vec<u8>,
-    pub client_hello_record_legacy_version_major: u8,
-    pub client_hello_record_legacy_version_minor: u8,
-    pub client_hello_content_version_major: u8,
-    pub client_hello_content_version_minor: u8,
-    pub parsed_digest: Option<ParsedClientHelloDigest>,
-    pub client_reader: StreamReader,
-    pub requested_server_name: Option<String>,
-    pub supports_tls13: bool,
+pub(crate) struct ParsedClientHello {
+    pub(crate) client_hello_frame: Vec<u8>,
+    pub(crate) client_hello_record_legacy_version_major: u8,
+    pub(crate) client_hello_record_legacy_version_minor: u8,
+    pub(crate) client_hello_content_version_major: u8,
+    pub(crate) client_hello_content_version_minor: u8,
+    pub(crate) parsed_digest: Option<ParsedClientHelloDigest>,
+    pub(crate) client_reader: StreamReader,
+    pub(crate) requested_server_name: Option<String>,
+    pub(crate) supports_tls13: bool,
 }
 
-pub struct ParsedClientHelloDigest {
-    pub client_hello_digest: Vec<u8>,
-    pub client_hello_digest_start_index: usize,
-    pub client_hello_digest_end_index: usize,
+pub(crate) struct ParsedClientHelloDigest {
+    pub(crate) client_hello_digest: Vec<u8>,
+    pub(crate) client_hello_digest_start_index: usize,
+    pub(crate) client_hello_digest_end_index: usize,
 }
 
 #[inline]
-pub async fn read_client_hello(
+pub(crate) async fn read_client_hello(
     server_stream: &mut Box<dyn AsyncStream>,
 ) -> std::io::Result<ParsedClientHello> {
     // enough for tls header + a max tls payload
@@ -425,11 +428,11 @@ pub async fn read_client_hello(
     })
 }
 
-pub struct ParsedServerHello {
-    pub server_random: Vec<u8>,
+pub(crate) struct ParsedServerHello {
+    pub(crate) server_random: Vec<u8>,
 }
 
-pub fn parse_server_hello(server_hello_frame: &[u8]) -> std::io::Result<ParsedServerHello> {
+pub(crate) fn parse_server_hello(server_hello_frame: &[u8]) -> std::io::Result<ParsedServerHello> {
     // we don't need to validate that the frame is large enough to contain the header, because
     // a full header was read in order to successfully read the complete frame that is passed in
     // to this function.
@@ -1066,7 +1069,7 @@ async fn setup_local_handshake(
 }
 
 #[inline]
-pub fn feed_server_connection(
+pub(crate) fn feed_server_connection(
     server_connection: &mut rustls::ServerConnection,
     data: &[u8],
 ) -> std::io::Result<()> {

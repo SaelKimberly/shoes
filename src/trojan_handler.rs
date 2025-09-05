@@ -13,7 +13,7 @@ use crate::shadowsocks::{
 };
 use crate::socks_handler::{CMD_CONNECT, CMD_UDP_ASSOCIATE, read_location, write_location_to_vec};
 use crate::stream_reader::StreamReader;
-use crate::tcp_handler::{
+use crate::tcp::tcp_handler::{
     TcpClientHandler, TcpClientSetupResult, TcpServerHandler, TcpServerSetupResult,
 };
 use crate::util::write_all;
@@ -25,13 +25,13 @@ struct ShadowsocksData {
 }
 
 #[derive(Debug)]
-pub struct TrojanTcpHandler {
+pub(crate) struct TrojanTcpHandler {
     password_hash: Box<[u8]>,
     shadowsocks_data: Option<ShadowsocksData>,
 }
 
 impl TrojanTcpHandler {
-    pub fn new(password: &str, shadowsocks_config: &Option<ShadowsocksConfig>) -> Self {
+    pub(crate) fn new(password: &str, shadowsocks_config: &Option<ShadowsocksConfig>) -> Self {
         let password_hash = create_password_hash(password);
         let shadowsocks_data = shadowsocks_config.as_ref().map(|config| {
             let ShadowsocksConfig {

@@ -5,7 +5,7 @@ use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 
 use crate::async_stream::{AsyncPing, AsyncStream};
 
-pub struct NoopStream;
+pub(crate) struct NoopStream;
 
 impl AsyncRead for NoopStream {
     fn poll_read(

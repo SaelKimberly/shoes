@@ -10,7 +10,7 @@ use crate::async_stream::{AsyncPing, AsyncStream};
 use crate::config::WebsocketPingType;
 use crate::util::allocate_vec;
 
-pub struct WebsocketStream {
+pub(crate) struct WebsocketStream {
     stream: Box<dyn AsyncStream>,
     is_client: bool,
     ping_type: WebsocketPingType,
@@ -47,7 +47,7 @@ enum ReadState {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum OpCode {
+pub(crate) enum OpCode {
     Continue,
     Text,
     Binary,
@@ -58,7 +58,7 @@ pub enum OpCode {
 }
 
 impl OpCode {
-    pub fn from(code: u8) -> Self {
+    pub(crate) fn from(code: u8) -> Self {
         match code {
             0 => OpCode::Continue,
             1 => OpCode::Text,
@@ -72,7 +72,7 @@ impl OpCode {
 }
 
 impl WebsocketStream {
-    pub fn new(
+    pub(crate) fn new(
         stream: Box<dyn AsyncStream>,
         is_client: bool,
         ping_type: WebsocketPingType,

@@ -10,7 +10,7 @@ use crate::async_stream::{
     AsyncStream, AsyncWriteMessage,
 };
 
-pub struct VlessMessageStream {
+pub(crate) struct VlessMessageStream {
     stream: Box<dyn AsyncStream>,
     read_buf: [u8; 65537],
     read_end_index: usize,
@@ -20,7 +20,7 @@ pub struct VlessMessageStream {
 }
 
 impl VlessMessageStream {
-    pub fn new(stream: Box<dyn AsyncStream>) -> Self {
+    pub(crate) fn new(stream: Box<dyn AsyncStream>) -> Self {
         Self {
             stream,
             read_buf: [0u8; 65537],
@@ -31,7 +31,7 @@ impl VlessMessageStream {
         }
     }
 
-    pub fn feed_initial_read_data(&mut self, data: &[u8]) -> std::io::Result<()> {
+    pub(crate) fn feed_initial_read_data(&mut self, data: &[u8]) -> std::io::Result<()> {
         if data.len() > self.read_buf.len() {
             return Err(std::io::Error::other(
                 "feed_initial_read_data called with too much data",

@@ -13,15 +13,15 @@ use crate::address::NetLocation;
 
 type ResolveFuture = Pin<Box<dyn Future<Output = std::io::Result<Vec<SocketAddr>>> + Send>>;
 
-pub trait Resolver: Send + Sync + Debug {
+pub(crate) trait Resolver: Send + Sync + Debug {
     fn resolve_location(&self, location: &NetLocation) -> ResolveFuture;
 }
 
 #[derive(Debug)]
-pub struct NativeResolver;
+pub(crate) struct NativeResolver;
 
 impl NativeResolver {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         NativeResolver {}
     }
 }
@@ -44,7 +44,7 @@ impl Resolver for NativeResolver {
     }
 }
 
-pub async fn resolve_single_address(
+pub(crate) async fn resolve_single_address(
     resolver: &Arc<dyn Resolver>,
     location: &NetLocation,
 ) -> std::io::Result<SocketAddr> {
@@ -60,7 +60,7 @@ pub async fn resolve_single_address(
     Ok(resolve_results[0])
 }
 
-pub struct ResolverCache {
+pub(crate) struct ResolverCache {
     resolver: Arc<dyn Resolver>,
     cache: FxHashMap<NetLocation, ResolveState>,
     result_timeout_secs: u64,
@@ -72,9 +72,9 @@ enum ResolveState {
 }
 
 impl ResolverCache {
-    pub const DEFAULT_RESULT_TIMEOUT_SECS: u64 = 60 * 60;
+    pub(crate) const DEFAULT_RESULT_TIMEOUT_SECS: u64 = 60 * 60;
 
-    pub fn new_with_timeout(resolver: Arc<dyn Resolver>, result_timeout_secs: u64) -> Self {
+    pub(crate) fn new_with_timeout(resolver: Arc<dyn Resolver>, result_timeout_secs: u64) -> Self {
         Self {
             resolver,
             cache: FxHashMap::default(),
@@ -82,11 +82,11 @@ impl ResolverCache {
         }
     }
 
-    pub fn new(resolver: Arc<dyn Resolver>) -> Self {
+    pub(crate) fn new(resolver: Arc<dyn Resolver>) -> Self {
         Self::new_with_timeout(resolver, Self::DEFAULT_RESULT_TIMEOUT_SECS)
     }
     #[cfg(feature = "hysteria")]
-    pub fn resolve_location<'a, 'b>(
+    pub(crate) fn resolve_location<'a, 'b>(
         &'a mut self,
         target: &'b NetLocation,
     ) -> ResolveLocation<'a, 'b> {
@@ -96,7 +96,7 @@ impl ResolverCache {
         }
     }
 
-    pub fn poll_resolve_location(
+    pub(crate) fn poll_resolve_location(
         &mut self,
         cx: &mut Context<'_>,
         target: &NetLocation,
@@ -162,7 +162,7 @@ impl ResolverCache {
     }
 }
 #[cfg(feature = "hysteria")]
-pub struct ResolveLocation<'a, 'b> {
+pub(crate) struct ResolveLocation<'a, 'b> {
     resolver_cache: &'a mut ResolverCache,
     target: &'b NetLocation,
 }

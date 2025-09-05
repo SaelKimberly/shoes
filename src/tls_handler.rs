@@ -13,13 +13,13 @@ use crate::shadow_tls::{
     ParsedClientHello, ShadowTlsServerTarget, feed_server_connection, read_client_hello,
     setup_shadowtls_server_stream,
 };
-use crate::tcp_client_connector::TcpClientConnector;
-use crate::tcp_handler::{
+use crate::tcp::tcp_client_connector::TcpClientConnector;
+use crate::tcp::tcp_handler::{
     TcpClientHandler, TcpClientSetupResult, TcpServerHandler, TcpServerSetupResult,
 };
 
 #[derive(Debug)]
-pub struct TlsServerHandler {
+pub(crate) struct TlsServerHandler {
     sni_targets: FxHashMap<String, TlsServerTarget>,
     default_target: Option<TlsServerTarget>,
     // used to resolve handshake server hostnames
@@ -29,7 +29,7 @@ pub struct TlsServerHandler {
 
 #[derive(Debug)]
 #[allow(clippy::large_enum_variant)]
-pub enum TlsServerTarget {
+pub(crate) enum TlsServerTarget {
     Tls {
         server_config: Arc<rustls::ServerConfig>,
         handler: Box<dyn TcpServerHandler>,
@@ -39,7 +39,7 @@ pub enum TlsServerTarget {
 }
 
 impl TlsServerHandler {
-    pub fn new(
+    pub(crate) fn new(
         sni_targets: FxHashMap<String, TlsServerTarget>,
         default_target: Option<TlsServerTarget>,
         tls_buffer_size: Option<usize>,
@@ -161,15 +161,15 @@ impl TcpServerHandler for TlsServerHandler {
 }
 
 #[derive(Debug)]
-pub struct TlsClientHandler {
-    pub client_config: Arc<rustls::ClientConfig>,
-    pub tls_buffer_size: Option<usize>,
-    pub server_name: rustls::pki_types::ServerName<'static>,
-    pub handler: Box<dyn TcpClientHandler>,
+pub(crate) struct TlsClientHandler {
+    pub(crate) client_config: Arc<rustls::ClientConfig>,
+    pub(crate) tls_buffer_size: Option<usize>,
+    pub(crate) server_name: rustls::pki_types::ServerName<'static>,
+    pub(crate) handler: Box<dyn TcpClientHandler>,
 }
 
 impl TlsClientHandler {
-    pub fn new(
+    pub(crate) fn new(
         client_config: Arc<rustls::ClientConfig>,
         tls_buffer_size: Option<usize>,
         server_name: rustls::pki_types::ServerName<'static>,

@@ -15,13 +15,13 @@ use crate::async_stream::{
 use crate::resolver::{Resolver, ResolverCache};
 
 /// A thin wrapper around a directly connecting UdpSocket to support hostname resolution.
-pub struct UdpMessageStream {
+pub(crate) struct UdpMessageStream {
     socket: UdpSocket,
     resolver_cache: ResolverCache,
 }
 
 impl UdpMessageStream {
-    pub fn new(socket: UdpSocket, resolver: Arc<dyn Resolver>) -> Self {
+    pub(crate) fn new(socket: UdpSocket, resolver: Arc<dyn Resolver>) -> Self {
         Self {
             socket,
             resolver_cache: ResolverCache::new(resolver),

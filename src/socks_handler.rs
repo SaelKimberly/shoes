@@ -6,41 +6,41 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use crate::address::{Address, NetLocation};
 use crate::async_stream::AsyncStream;
 use crate::stream_reader::StreamReader;
-use crate::tcp_handler::{TcpClientHandler, TcpClientSetupResult};
+use crate::tcp::tcp_handler::{TcpClientHandler, TcpClientSetupResult};
 use crate::util::write_all;
 
 #[cfg(feature = "socks")]
 use crate::option_util::NoneOrOne;
 #[cfg(feature = "socks")]
-use crate::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
+use crate::tcp::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
 #[cfg(feature = "socks")]
 use std::sync::OnceLock;
 
-pub const VER_SOCKS5: u8 = 0x05;
-pub const VER_AUTH: u8 = 0x01;
+pub(crate) const VER_SOCKS5: u8 = 0x05;
+pub(crate) const VER_AUTH: u8 = 0x01;
 
-pub const METHOD_NONE: u8 = 0x00;
-pub const METHOD_USERNAME: u8 = 0x02;
-pub const METHOD_INVALID: u8 = 0xff;
+pub(crate) const METHOD_NONE: u8 = 0x00;
+pub(crate) const METHOD_USERNAME: u8 = 0x02;
+pub(crate) const METHOD_INVALID: u8 = 0xff;
 
-pub const ADDR_TYPE_IPV4: u8 = 0x01;
-pub const ADDR_TYPE_DOMAIN_NAME: u8 = 0x03;
-pub const ADDR_TYPE_IPV6: u8 = 0x04;
+pub(crate) const ADDR_TYPE_IPV4: u8 = 0x01;
+pub(crate) const ADDR_TYPE_DOMAIN_NAME: u8 = 0x03;
+pub(crate) const ADDR_TYPE_IPV6: u8 = 0x04;
 
-pub const RESULT_SUCCESS: u8 = 0x0;
+pub(crate) const RESULT_SUCCESS: u8 = 0x0;
 
-pub const CMD_CONNECT: u8 = 0x01;
-pub const CMD_UDP_ASSOCIATE: u8 = 0x03;
+pub(crate) const CMD_CONNECT: u8 = 0x01;
+pub(crate) const CMD_UDP_ASSOCIATE: u8 = 0x03;
 
 #[cfg(feature = "socks")]
 #[derive(Debug)]
-pub struct SocksTcpServerHandler {
+pub(crate) struct SocksTcpServerHandler {
     auth_info: Option<(String, String)>,
 }
 
 #[cfg(feature = "socks")]
 impl SocksTcpServerHandler {
-    pub fn new(auth_info: Option<(String, String)>) -> Self {
+    pub(crate) fn new(auth_info: Option<(String, String)>) -> Self {
         Self { auth_info }
     }
 }
@@ -219,13 +219,13 @@ impl TcpServerHandler for SocksTcpServerHandler {
 }
 
 #[derive(Debug)]
-pub struct SocksTcpClientHandler {
+pub(crate) struct SocksTcpClientHandler {
     prefix_data: Vec<u8>,
     has_auth: bool,
 }
 
 impl SocksTcpClientHandler {
-    pub fn new(auth_info: Option<(String, String)>) -> Self {
+    pub(crate) fn new(auth_info: Option<(String, String)>) -> Self {
         let mut data = vec![
             VER_SOCKS5,
             1, // number of methods,
@@ -341,7 +341,7 @@ impl TcpClientHandler for SocksTcpClientHandler {
     }
 }
 
-pub async fn read_location<T: AsyncReadExt + Unpin>(
+pub(crate) async fn read_location<T: AsyncReadExt + Unpin>(
     stream: &mut T,
     stream_reader: &mut StreamReader,
 ) -> std::io::Result<NetLocation> {
@@ -413,7 +413,7 @@ pub async fn read_location<T: AsyncReadExt + Unpin>(
     }
 }
 
-pub fn write_location_to_vec(location: &NetLocation) -> Vec<u8> {
+pub(crate) fn write_location_to_vec(location: &NetLocation) -> Vec<u8> {
     let (address, port) = location.components();
     let mut vec = match address {
         Address::Ipv4(v4addr) => {

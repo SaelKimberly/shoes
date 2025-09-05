@@ -27,7 +27,7 @@ fn generate_iv(buf: &mut [u8]) {
     rng.fill_bytes(buf);
 }
 
-pub struct IncreasingSequence([u8; NONCE_LEN]);
+pub(crate) struct IncreasingSequence([u8; NONCE_LEN]);
 
 impl IncreasingSequence {
     fn new() -> IncreasingSequence {
@@ -48,7 +48,7 @@ impl NonceSequence for IncreasingSequence {
     }
 }
 
-pub struct ShadowsocksStream {
+pub(crate) struct ShadowsocksStream {
     stream: Box<dyn AsyncStream>,
 
     stream_type: ShadowsocksStreamType,
@@ -88,7 +88,7 @@ enum DecryptState {
 const METADATA_SIZE: usize = 2 + (2 * TAG_LEN);
 
 impl ShadowsocksStream {
-    pub fn new(
+    pub(crate) fn new(
         stream: Box<dyn AsyncStream>,
         stream_type: ShadowsocksStreamType,
         algorithm: &'static Algorithm,

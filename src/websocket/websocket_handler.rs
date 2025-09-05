@@ -14,27 +14,27 @@ use crate::client_proxy_selector::ClientProxySelector;
 use crate::config::WebsocketPingType;
 use crate::option_util::NoneOrOne;
 use crate::stream_reader::StreamReader;
-use crate::tcp_client_connector::TcpClientConnector;
-use crate::tcp_handler::{
+use crate::tcp::tcp_client_connector::TcpClientConnector;
+use crate::tcp::tcp_handler::{
     TcpClientHandler, TcpClientSetupResult, TcpServerHandler, TcpServerSetupResult,
 };
 
 #[derive(Debug)]
-pub struct WebsocketServerTarget {
-    pub matching_path: Option<String>,
-    pub matching_headers: Option<FxHashMap<String, String>>,
-    pub ping_type: WebsocketPingType,
-    pub handler: Box<dyn TcpServerHandler>,
-    pub override_proxy_provider: NoneOrOne<Arc<ClientProxySelector<TcpClientConnector>>>,
+pub(crate) struct WebsocketServerTarget {
+    pub(crate) matching_path: Option<String>,
+    pub(crate) matching_headers: Option<FxHashMap<String, String>>,
+    pub(crate) ping_type: WebsocketPingType,
+    pub(crate) handler: Box<dyn TcpServerHandler>,
+    pub(crate) override_proxy_provider: NoneOrOne<Arc<ClientProxySelector<TcpClientConnector>>>,
 }
 
 #[derive(Debug)]
-pub struct WebsocketTcpServerHandler {
+pub(crate) struct WebsocketTcpServerHandler {
     server_targets: Vec<WebsocketServerTarget>,
 }
 
 impl WebsocketTcpServerHandler {
-    pub fn new(server_targets: Vec<WebsocketServerTarget>) -> Self {
+    pub(crate) fn new(server_targets: Vec<WebsocketServerTarget>) -> Self {
         Self { server_targets }
     }
 }
@@ -151,7 +151,7 @@ impl TcpServerHandler for WebsocketTcpServerHandler {
 }
 
 #[derive(Debug)]
-pub struct WebsocketTcpClientHandler {
+pub(crate) struct WebsocketTcpClientHandler {
     matching_path: Option<String>,
     matching_headers: Option<FxHashMap<String, String>>,
     ping_type: WebsocketPingType,
@@ -159,7 +159,7 @@ pub struct WebsocketTcpClientHandler {
 }
 
 impl WebsocketTcpClientHandler {
-    pub fn new(
+    pub(crate) fn new(
         matching_path: Option<String>,
         matching_headers: Option<FxHashMap<String, String>>,
         ping_type: WebsocketPingType,

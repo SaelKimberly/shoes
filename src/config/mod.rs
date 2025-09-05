@@ -3,7 +3,7 @@ mod types;
 pub use types::*;
 
 use std::collections::HashMap;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use log::debug;
 
@@ -12,8 +12,10 @@ use crate::option_util::{NoneOrSome, OneOrSome};
 use crate::thread_util::get_num_threads;
 use crate::util::parse_uuid;
 
+#[allow(dead_code)]
 const MIN_TLS_BUFFER_SIZE: usize = 16 * 1024;
 
+#[allow(dead_code)]
 pub(crate) async fn load_configs(args: &Vec<PathBuf>) -> std::io::Result<Vec<Config>> {
     let mut all_configs = vec![];
     for config_filename in args {
@@ -51,9 +53,9 @@ pub(crate) async fn load_configs(args: &Vec<PathBuf>) -> std::io::Result<Vec<Con
 
     Ok(all_configs)
 }
-
+#[allow(dead_code)]
 pub(crate) async fn convert_cert_paths(
-all_configs: Vec<Config>,
+    all_configs: Vec<Config>,
 ) -> std::io::Result<(Vec<Config>, usize)> {
     // this converts configs by removing all file references:
     // - all named pems that point to a file are loaded into a data-backed pem
@@ -130,9 +132,9 @@ all_configs: Vec<Config>,
 
     Ok((updated_configs, load_count))
 }
-
+#[allow(dead_code)]
 pub(crate) async fn create_server_configs(
-all_configs: Vec<Config>,
+    all_configs: Vec<Config>,
 ) -> std::io::Result<Vec<ServerConfig>> {
     let mut client_groups: HashMap<String, Vec<ClientConfig>> = HashMap::new();
     client_groups.insert(String::from("direct"), vec![ClientConfig::default()]);
@@ -801,7 +803,7 @@ fn embed_optional_pem_from_map(pem: &mut Option<String>, named_pems: &HashMap<St
 }
 
 #[allow(dead_code)]
-pub async fn save_config(path: &Path, configs: &[Config]) -> std::io::Result<()> {
+pub(crate) async fn save_config(path: &Path, configs: &[Config]) -> std::io::Result<()> {
     let yaml_str = serde_yaml::to_string(configs).map_err(|e| {
         std::io::Error::new(
             std::io::ErrorKind::InvalidData,

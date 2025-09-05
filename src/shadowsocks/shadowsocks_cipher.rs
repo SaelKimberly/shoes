@@ -4,7 +4,7 @@ use aws_lc_rs::aead::{AES_128_GCM, AES_256_GCM, Algorithm, CHACHA20_POLY1305};
 use super::aead_util::TAG_LEN;
 
 #[derive(Debug)]
-pub struct ShadowsocksCipher {
+pub(crate) struct ShadowsocksCipher {
     algorithm: &'static Algorithm,
     salt_len: usize,
 }
@@ -32,11 +32,11 @@ impl ShadowsocksCipher {
         }
     }
 
-    pub fn algorithm(&self) -> &'static Algorithm {
+    pub(crate) fn algorithm(&self) -> &'static Algorithm {
         self.algorithm
     }
 
-    pub fn salt_len(&self) -> usize {
+    pub(crate) fn salt_len(&self) -> usize {
         self.salt_len
     }
 }

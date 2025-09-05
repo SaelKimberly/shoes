@@ -17,7 +17,7 @@ use crate::async_stream::{
 };
 use crate::resolver::{Resolver, ResolverCache};
 
-pub struct UdpMultiMessageStream {
+pub(crate) struct UdpMultiMessageStream {
     // We use a dedicated send socket so that tasks waiting for writable get
     // awoken correctly. In addition, when sending to the same destination
     // from multiple sockets, the underlying network stack (and NIC) is
@@ -40,7 +40,7 @@ pub struct UdpMultiMessageStream {
 // poll_send only require &self. Since we only use this for multidirectional
 // UDP, we implement the relevant traits directly instead.
 impl UdpMultiMessageStream {
-    pub fn new(sockets: Vec<Arc<UdpSocket>>, resolver: Arc<dyn Resolver>) -> Self {
+    pub(crate) fn new(sockets: Vec<Arc<UdpSocket>>, resolver: Arc<dyn Resolver>) -> Self {
         if sockets.is_empty() {
             panic!("at least one socket is required");
         }

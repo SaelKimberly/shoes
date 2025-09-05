@@ -21,7 +21,7 @@ use super::typed::Aes128CfbEnc;
 use super::vmess_stream::{ReadHeaderInfo, VmessStream};
 use crate::address::{Address, NetLocation};
 use crate::async_stream::AsyncStream;
-use crate::tcp_handler::{TcpClientHandler, TcpClientSetupResult};
+use crate::tcp::tcp_handler::{TcpClientHandler, TcpClientSetupResult};
 use crate::util::{parse_uuid, write_all};
 
 #[cfg(feature = "vmess")]
@@ -31,7 +31,7 @@ use crate::option_util::NoneOrOne;
 #[cfg(feature = "vmess")]
 use crate::stream_reader::StreamReader;
 #[cfg(feature = "vmess")]
-use crate::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
+use crate::tcp::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
 #[cfg(feature = "vmess")]
 use crate::util::allocate_vec;
 #[cfg(feature = "vmess")]
@@ -77,7 +77,7 @@ struct CertHashProvider {
 }
 #[cfg(feature = "vmess")]
 impl CertHashProvider {
-    pub fn new(user_id_bytes: &[u8]) -> Self {
+    pub(crate) fn new(user_id_bytes: &[u8]) -> Self {
         if user_id_bytes.len() != 16 {
             panic!("invalid user id bytes length ({})", user_id_bytes.len());
         }
@@ -90,7 +90,7 @@ impl CertHashProvider {
         }
     }
 
-    pub fn check(&mut self, hash: &UserHash) -> Option<u64> {
+    pub(crate) fn check(&mut self, hash: &UserHash) -> Option<u64> {
         if let Some(time_secs) = self.hashes.get(hash) {
             return Some(*time_secs);
         }
@@ -125,7 +125,7 @@ impl CertHashProvider {
 
 #[cfg(feature = "vmess")]
 #[derive(Debug)]
-pub struct VmessTcpServerHandler {
+pub(crate) struct VmessTcpServerHandler {
     data_cipher: DataCipher,
     instruction_key: [u8; 16],
     aead_cipher: Aes128,
@@ -134,7 +134,12 @@ pub struct VmessTcpServerHandler {
 }
 #[cfg(feature = "vmess")]
 impl VmessTcpServerHandler {
-    pub fn new(cipher_name: &str, user_id: &str, force_aead: bool, udp_enabled: bool) -> Self {
+    pub(crate) fn new(
+        cipher_name: &str,
+        user_id: &str,
+        force_aead: bool,
+        udp_enabled: bool,
+    ) -> Self {
         let mut user_id_bytes = parse_uuid(user_id).unwrap();
         let cert_hash_provider = if force_aead {
             None
@@ -731,7 +736,7 @@ impl AeadHeaderReader {
 }
 
 #[derive(Debug)]
-pub struct VmessTcpClientHandler {
+pub(crate) struct VmessTcpClientHandler {
     data_cipher: DataCipher,
     user_key: [u8; 16],
     instruction_key: [u8; 16],
@@ -740,7 +745,7 @@ pub struct VmessTcpClientHandler {
 }
 
 impl VmessTcpClientHandler {
-    pub fn new(cipher_name: &str, user_id: &str, is_aead: bool) -> Self {
+    pub(crate) fn new(cipher_name: &str, user_id: &str, is_aead: bool) -> Self {
         let mut user_id_bytes = parse_uuid(user_id).unwrap();
         let mut user_key = [0u8; 16];
         user_key.copy_from_slice(&user_id_bytes);

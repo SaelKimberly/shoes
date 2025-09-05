@@ -12,7 +12,7 @@ use crate::address::NetLocation;
 use crate::async_stream::{AsyncSourcedMessageStream, AsyncTargetedMessageStream};
 
 // Informed by https://stackoverflow.com/questions/14856639/udp-hole-punching-timeout
-pub const DEFAULT_ASSOCIATION_TIMEOUT_SECS: u32 = 200;
+pub(crate) const DEFAULT_ASSOCIATION_TIMEOUT_SECS: u32 = 200;
 
 #[derive(Debug)]
 struct CopyProxyBuffer {
@@ -27,7 +27,7 @@ struct CopyProxyBuffer {
 }
 
 impl CopyProxyBuffer {
-    pub fn new(need_flush: bool) -> Self {
+    pub(crate) fn new(need_flush: bool) -> Self {
         Self {
             read_done: false,
             need_flush,
@@ -40,7 +40,7 @@ impl CopyProxyBuffer {
         }
     }
 
-    pub fn poll_copy_targeted_messages<R, W>(
+    pub(crate) fn poll_copy_targeted_messages<R, W>(
         &mut self,
         cx: &mut Context<'_>,
         mut reader: Pin<&mut R>,
@@ -165,7 +165,7 @@ struct CopyManyBuffer {
 }
 
 impl CopyManyBuffer {
-    pub fn new(need_flush: bool) -> Self {
+    pub(crate) fn new(need_flush: bool) -> Self {
         Self {
             read_done: false,
             need_flush,
@@ -178,7 +178,7 @@ impl CopyManyBuffer {
         }
     }
 
-    pub fn poll_copy_sourced_messages<R, W>(
+    pub(crate) fn poll_copy_sourced_messages<R, W>(
         &mut self,
         cx: &mut Context<'_>,
         mut reader: Pin<&mut R>,
@@ -454,7 +454,7 @@ where
 /// # Return value
 ///
 /// Returns a tuple of bytes copied `a` to `b` and bytes copied `b` to `a`.
-pub async fn copy_multidirectional_message<A, B>(
+pub(crate) async fn copy_multidirectional_message<A, B>(
     a: &mut A,
     b: &mut B,
     a_initial_flush: bool,

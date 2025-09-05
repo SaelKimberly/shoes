@@ -11,7 +11,7 @@ use crate::option_util::NoneOrOne;
 use crate::salt_checker::SaltChecker;
 use crate::socks_handler::{read_location, write_location_to_vec};
 use crate::stream_reader::StreamReader;
-use crate::tcp_handler::{
+use crate::tcp::tcp_handler::{
     TcpClientHandler, TcpClientSetupResult, TcpServerHandler, TcpServerSetupResult,
 };
 use crate::timed_salt_checker::TimedSaltChecker;
@@ -25,7 +25,7 @@ use super::shadowsocks_stream::ShadowsocksStream;
 use super::shadowsocks_stream_type::ShadowsocksStreamType;
 
 #[derive(Debug)]
-pub struct ShadowsocksTcpHandler {
+pub(crate) struct ShadowsocksTcpHandler {
     cipher: ShadowsocksCipher,
     key: Arc<Box<dyn ShadowsocksKey>>,
     aead2022: bool,
@@ -33,7 +33,7 @@ pub struct ShadowsocksTcpHandler {
 }
 
 impl ShadowsocksTcpHandler {
-    pub fn new(cipher_name: &str, password: &str) -> Self {
+    pub(crate) fn new(cipher_name: &str, password: &str) -> Self {
         let cipher: ShadowsocksCipher = cipher_name.into();
         let key: Arc<Box<dyn ShadowsocksKey>> = Arc::new(Box::new(DefaultKey::new(
             password,
@@ -47,7 +47,7 @@ impl ShadowsocksTcpHandler {
         }
     }
 
-    pub fn new_aead2022(cipher_name: &str, key_bytes: &[u8]) -> Self {
+    pub(crate) fn new_aead2022(cipher_name: &str, key_bytes: &[u8]) -> Self {
         let cipher: ShadowsocksCipher = cipher_name.into();
         let key: Arc<Box<dyn ShadowsocksKey>> = Arc::new(Box::new(Blake3Key::new(
             key_bytes.to_vec().into_boxed_slice(),

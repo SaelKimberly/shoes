@@ -16,9 +16,9 @@ use crate::copy_bidirectional::copy_bidirectional;
 
 use crate::copy_multidirectional_message::copy_multidirectional_message;
 use crate::resolver::{NativeResolver, Resolver};
-use crate::tcp_client_connector::TcpClientConnector;
-use crate::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
-use crate::tcp_handler_util::{create_tcp_client_proxy_selector, create_tcp_server_handler};
+use crate::tcp::tcp_client_connector::TcpClientConnector;
+use crate::tcp::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
+use crate::tcp::tcp_handler_util::{create_tcp_client_proxy_selector, create_tcp_server_handler};
 use crate::udp_message_stream::UdpMessageStream;
 use crate::udp_multi_message_stream::UdpMultiMessageStream;
 
@@ -331,7 +331,7 @@ where
     }
 }
 
-pub async fn setup_client_stream(
+pub(crate) async fn setup_client_stream(
     server_stream: &mut Box<dyn AsyncStream>,
     client_proxy_selector: Arc<ClientProxySelector<TcpClientConnector>>,
     resolver: Arc<dyn Resolver>,
@@ -355,7 +355,9 @@ pub async fn setup_client_stream(
     }
 }
 
-pub async fn start_tcp_servers(config: ServerConfig) -> std::io::Result<Vec<JoinHandle<()>>> {
+pub(crate) async fn start_tcp_servers(
+    config: ServerConfig,
+) -> std::io::Result<Vec<JoinHandle<()>>> {
     let ServerConfig {
         bind_location,
         tcp_settings,

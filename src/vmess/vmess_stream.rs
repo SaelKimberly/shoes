@@ -70,7 +70,7 @@ enum ShutdownState {
     PollShutdown,
 }
 
-pub struct VmessStream {
+pub(crate) struct VmessStream {
     stream: Box<dyn AsyncStream>,
 
     read_header_state: ReadHeaderState,
@@ -110,11 +110,11 @@ enum DecryptState {
 }
 
 // Expected VMess header response, when we're a client.
-pub struct ReadHeaderInfo {
-    pub is_aead: bool,
-    pub response_header_key: [u8; 16],
-    pub response_header_iv: [u8; 16],
-    pub response_authentication_v: u8,
+pub(crate) struct ReadHeaderInfo {
+    pub(crate) is_aead: bool,
+    pub(crate) response_header_key: [u8; 16],
+    pub(crate) response_header_iv: [u8; 16],
+    pub(crate) response_authentication_v: u8,
 }
 
 #[derive(PartialEq, Eq, Debug)]
@@ -149,7 +149,7 @@ fn check_header_response(
 
 impl VmessStream {
     #[allow(clippy::too_many_arguments)]
-    pub fn new(
+    pub(crate) fn new(
         stream: Box<dyn AsyncStream>,
         is_udp: bool,
         encryption_keys: Option<(
@@ -244,7 +244,7 @@ impl VmessStream {
         }
     }
     #[cfg(feature = "vmess")]
-    pub fn feed_initial_read_data(&mut self, data: &[u8]) -> std::io::Result<()> {
+    pub(crate) fn feed_initial_read_data(&mut self, data: &[u8]) -> std::io::Result<()> {
         assert!(self.unprocessed_end_offset == 0);
 
         if data.len() > self.unprocessed_buf.len() {

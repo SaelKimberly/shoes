@@ -72,28 +72,28 @@ pub struct ServerQuicConfig {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct ClientConfigGroup {
-    pub client_group: String,
+pub(crate) struct ClientConfigGroup {
+    pub(crate) client_group: String,
     // TODO: do a topological sort and allow this to be OneOrSome<ConfigSelection>
     #[serde(alias = "client_proxy")]
-    pub client_proxies: OneOrSome<ClientConfig>,
+    pub(crate) client_proxies: OneOrSome<ClientConfig>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct RuleConfigGroup {
-    pub rule_group: String,
+pub(crate) struct RuleConfigGroup {
+    pub(crate) rule_group: String,
     #[serde(alias = "rule")]
-    pub rules: OneOrSome<RuleConfig>,
+    pub(crate) rules: OneOrSome<RuleConfig>,
 }
 
 #[derive(Debug, Clone)]
-pub struct NamedPem {
-    pub pem: String, // The name identifier
-    pub source: PemSource,
+pub(crate) struct NamedPem {
+    pub(crate) pem: String, // The name identifier
+    pub(crate) source: PemSource,
 }
 
 #[derive(Debug, Clone)]
-pub enum PemSource {
+pub(crate) enum PemSource {
     Path(String),
     Data(String),
 }
@@ -203,7 +203,7 @@ impl Serialize for NamedPem {
 
 #[derive(Debug, Clone)]
 #[allow(clippy::large_enum_variant)]
-pub enum Config {
+pub(crate) enum Config {
     Server(ServerConfig),
     ClientConfigGroup(ClientConfigGroup),
     RuleConfigGroup(RuleConfigGroup),
@@ -312,7 +312,7 @@ pub struct ServerConfig {
     pub rules: NoneOrSome<ConfigSelection<RuleConfig>>,
 }
 
-pub fn direct_allow_rule() -> NoneOrSome<ConfigSelection<RuleConfig>> {
+pub(crate) fn direct_allow_rule() -> NoneOrSome<ConfigSelection<RuleConfig>> {
     NoneOrSome::One(ConfigSelection::Config(RuleConfig::default()))
 }
 
@@ -633,7 +633,7 @@ pub enum ConfigSelection<T> {
 }
 
 impl<T> ConfigSelection<T> {
-    pub fn unwrap_config(self) -> T {
+    pub(crate) fn unwrap_config(self) -> T {
         match self {
             ConfigSelection::Config(config) => config,
             ConfigSelection::GroupName(_) => {
@@ -642,7 +642,7 @@ impl<T> ConfigSelection<T> {
         }
     }
 
-    pub fn unwrap_config_mut(&mut self) -> &mut T {
+    pub(crate) fn unwrap_config_mut(&mut self) -> &mut T {
         match self {
             ConfigSelection::Config(config) => config,
             ConfigSelection::GroupName(_) => {
@@ -682,7 +682,7 @@ impl<T> ConfigSelection<T> {
         Ok(ret)
     }
 
-    pub fn replace_none_or_some_groups(
+    pub(crate) fn replace_none_or_some_groups(
         selections: &mut NoneOrSome<ConfigSelection<T>>,
         client_groups: &HashMap<String, Vec<T>>,
     ) -> std::io::Result<()>
@@ -698,7 +698,7 @@ impl<T> ConfigSelection<T> {
         Ok(())
     }
 
-    pub fn replace_one_or_some_groups(
+    pub(crate) fn replace_one_or_some_groups(
         selections: &mut OneOrSome<ConfigSelection<T>>,
         client_groups: &HashMap<String, Vec<T>>,
     ) -> std::io::Result<()>
@@ -873,7 +873,7 @@ pub enum ClientProxyConfig {
 }
 
 impl ClientProxyConfig {
-    pub fn is_direct(&self) -> bool {
+    pub(crate) fn is_direct(&self) -> bool {
         matches!(self, ClientProxyConfig::Direct)
     }
 }

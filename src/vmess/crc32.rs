@@ -6,7 +6,7 @@ use std::sync::OnceLock;
 const POLY: u32 = 0xEDB88320;
 
 /// Returns the CRC32 checksum of `buf` using the Castagnoli polynomial.
-pub fn crc32c(buf: &[u8]) -> u32 {
+pub(crate) fn crc32c(buf: &[u8]) -> u32 {
     // I can't measure any difference between slice8 and slice16.
     let ret = crc32c_slice8(buf, !0);
     !ret
@@ -91,22 +91,22 @@ fn make_reverse_table(poly: u32) -> [u32; 256] {
     rev_tab
 }
 
-pub struct CrcBuilder(u32);
+pub(crate) struct CrcBuilder(u32);
 
 impl CrcBuilder {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self(!0)
     }
 
-    pub fn new_with_initial(initial: u32) -> Self {
+    pub(crate) fn new_with_initial(initial: u32) -> Self {
         Self(initial)
     }
 
-    pub fn update(&mut self, buf: &[u8]) {
+    pub(crate) fn update(&mut self, buf: &[u8]) {
         self.0 = crc32c_slice8(buf, self.0);
     }
 
-    pub fn to_crc(&self) -> u32 {
+    pub(crate) fn to_crc(&self) -> u32 {
         !self.0
     }
 }

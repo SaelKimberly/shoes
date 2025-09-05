@@ -4,7 +4,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 use crate::address::{Address, NetLocation};
 use crate::async_stream::AsyncStream;
-use crate::tcp_handler::{TcpClientHandler, TcpClientSetupResult};
+use crate::tcp::tcp_handler::{TcpClientHandler, TcpClientSetupResult};
 use crate::util::{allocate_vec, parse_uuid, write_all};
 
 #[cfg(feature = "vless")]
@@ -12,7 +12,7 @@ use crate::option_util::NoneOrOne;
 #[cfg(feature = "vless")]
 use crate::stream_reader::StreamReader;
 #[cfg(feature = "vless")]
-use crate::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
+use crate::tcp::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
 #[cfg(feature = "vless")]
 use crate::vless_message_stream::VlessMessageStream;
 #[cfg(feature = "vless")]
@@ -20,14 +20,14 @@ use std::net::{Ipv4Addr, Ipv6Addr};
 
 #[cfg(feature = "vless")]
 #[derive(Debug)]
-pub struct VlessTcpServerHandler {
+pub(crate) struct VlessTcpServerHandler {
     user_id: Box<[u8]>,
     udp_enabled: bool,
 }
 
 #[cfg(feature = "vless")]
 impl VlessTcpServerHandler {
-    pub fn new(user_id: &str, udp_enabled: bool) -> Self {
+    pub(crate) fn new(user_id: &str, udp_enabled: bool) -> Self {
         Self {
             user_id: parse_uuid(user_id).unwrap().into_boxed_slice(),
             udp_enabled,
@@ -194,12 +194,12 @@ impl TcpServerHandler for VlessTcpServerHandler {
 }
 
 #[derive(Debug)]
-pub struct VlessTcpClientHandler {
+pub(crate) struct VlessTcpClientHandler {
     user_id: Box<[u8]>,
 }
 
 impl VlessTcpClientHandler {
-    pub fn new(user_id: &str) -> Self {
+    pub(crate) fn new(user_id: &str) -> Self {
         Self {
             user_id: parse_uuid(user_id).unwrap().into_boxed_slice(),
         }

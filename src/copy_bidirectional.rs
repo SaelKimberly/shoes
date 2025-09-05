@@ -31,7 +31,7 @@ struct CopyBuffer {
 }
 
 impl CopyBuffer {
-    pub fn new(size: usize, need_initial_flush: bool) -> Self {
+    pub(crate) fn new(size: usize, need_initial_flush: bool) -> Self {
         let buf = allocate_vec(size);
         Self {
             read_done: false,
@@ -44,7 +44,7 @@ impl CopyBuffer {
         }
     }
 
-    pub fn poll_copy<R, W>(
+    pub(crate) fn poll_copy<R, W>(
         &mut self,
         cx: &mut Context<'_>,
         mut reader: Pin<&mut R>,
@@ -287,7 +287,7 @@ where
 /// # Return value
 ///
 /// Returns a tuple of bytes copied `a` to `b` and bytes copied `b` to `a`.
-pub async fn copy_bidirectional<A, B>(
+pub(crate) async fn copy_bidirectional<A, B>(
     a: &mut A,
     b: &mut B,
     a_need_initial_flush: bool,
@@ -312,7 +312,7 @@ where
 ///
 /// This method is the same as the [`copy_bidirectional()`], except that it allows you to set the
 /// size of the internal buffers used when copying data.
-pub async fn copy_bidirectional_with_sizes<A, B>(
+pub(crate) async fn copy_bidirectional_with_sizes<A, B>(
     a: &mut A,
     b: &mut B,
     a_need_initial_flush: bool,

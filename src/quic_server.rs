@@ -19,10 +19,10 @@ use crate::quic_stream::QuicStream;
 use crate::resolver::{NativeResolver, Resolver};
 use crate::rustls_util::create_server_config;
 use crate::socket_util::new_socket2_udp_socket;
-use crate::tcp_client_connector::TcpClientConnector;
-use crate::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
-use crate::tcp_handler_util::{create_tcp_client_proxy_selector, create_tcp_server_handler};
-use crate::tcp_server::setup_client_stream;
+use crate::tcp::tcp_client_connector::TcpClientConnector;
+use crate::tcp::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
+use crate::tcp::tcp_handler_util::{create_tcp_client_proxy_selector, create_tcp_server_handler};
+use crate::tcp::tcp_server::setup_client_stream;
 use crate::udp_message_stream::UdpMessageStream;
 use crate::udp_multi_message_stream::UdpMultiMessageStream;
 use crate::util::parse_uuid;
@@ -330,7 +330,9 @@ async fn process_streams(
     }
 }
 
-pub async fn start_quic_servers(config: ServerConfig) -> std::io::Result<Vec<JoinHandle<()>>> {
+pub(crate) async fn start_quic_servers(
+    config: ServerConfig,
+) -> std::io::Result<Vec<JoinHandle<()>>> {
     let ServerConfig {
         bind_location,
         quic_settings,

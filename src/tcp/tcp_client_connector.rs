@@ -10,8 +10,8 @@ use crate::quic_stream::QuicStream;
 use crate::resolver::{Resolver, resolve_single_address};
 use crate::rustls_util::create_client_config;
 use crate::socket_util::{new_reuse_udp_sockets, new_tcp_socket, new_udp_socket};
-use crate::tcp_handler::{TcpClientHandler, TcpClientSetupResult};
-use crate::tcp_handler_util::create_tcp_client_handler;
+use crate::tcp::tcp_handler::{TcpClientHandler, TcpClientSetupResult};
+use crate::tcp::tcp_handler_util::create_tcp_client_handler;
 use crate::thread_util::get_num_threads;
 
 const ALWAYS_RESOLVE_HOSTNAMES: bool = false;
@@ -30,7 +30,7 @@ enum TransportConfig {
 }
 
 #[derive(Debug)]
-pub struct TcpClientConnector {
+pub(crate) struct TcpClientConnector {
     bind_interface: Option<String>,
     location: NetLocation,
     transport_config: TransportConfig,
@@ -38,7 +38,7 @@ pub struct TcpClientConnector {
 }
 
 impl TcpClientConnector {
-    pub fn try_from(client_config: ClientConfig) -> Option<Self> {
+    pub(crate) fn try_from(client_config: ClientConfig) -> Option<Self> {
         let default_sni_hostname = client_config
             .address
             .address()
@@ -177,12 +177,15 @@ impl TcpClientConnector {
         })
     }
 
-    pub fn configure_udp_socket(&self, is_ipv6: bool) -> std::io::Result<tokio::net::UdpSocket> {
+    pub(crate) fn configure_udp_socket(
+        &self,
+        is_ipv6: bool,
+    ) -> std::io::Result<tokio::net::UdpSocket> {
         let udp_socket = new_udp_socket(is_ipv6, self.bind_interface.clone())?;
         Ok(udp_socket)
     }
 
-    pub fn configure_reuse_udp_sockets(
+    pub(crate) fn configure_reuse_udp_sockets(
         &self,
         is_ipv6: bool,
         count: usize,
@@ -191,7 +194,7 @@ impl TcpClientConnector {
         Ok(udp_socket)
     }
 
-    pub async fn connect(
+    pub(crate) async fn connect(
         &self,
         server_stream: &mut Box<dyn AsyncStream>,
         mut remote_location: NetLocation,

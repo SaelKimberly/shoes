@@ -7,12 +7,12 @@ use crate::address::NetLocation;
 use crate::async_stream::{AsyncStream, AsyncTargetedMessageStream};
 use crate::client_proxy_selector::ClientProxySelector;
 use crate::option_util::NoneOrOne;
-use crate::tcp_client_connector::TcpClientConnector;
+use crate::tcp::tcp_client_connector::TcpClientConnector;
 
 #[cfg(any(feature = "vmess", feature = "vless"))]
 use crate::async_stream::AsyncMessageStream;
 
-pub enum TcpServerSetupResult {
+pub(crate) enum TcpServerSetupResult {
     TcpForward {
         remote_location: NetLocation,
         stream: Box<dyn AsyncStream>,
@@ -41,7 +41,7 @@ pub enum TcpServerSetupResult {
 }
 
 impl TcpServerSetupResult {
-    pub fn set_need_initial_flush(&mut self, need_initial_flush: bool) {
+    pub(crate) fn set_need_initial_flush(&mut self, need_initial_flush: bool) {
         #[cfg(any(feature = "vmess", feature = "vless"))]
         match self {
             TcpServerSetupResult::TcpForward {
@@ -73,7 +73,7 @@ impl TcpServerSetupResult {
             }
         }
     }
-    pub fn override_proxy_provider_unspecified(&self) -> bool {
+    pub(crate) fn override_proxy_provider_unspecified(&self) -> bool {
         #[cfg(any(feature = "vmess", feature = "vless"))]
         match self {
             TcpServerSetupResult::TcpForward {
@@ -102,7 +102,7 @@ impl TcpServerSetupResult {
         }
     }
 
-    pub fn set_override_proxy_provider(
+    pub(crate) fn set_override_proxy_provider(
         &mut self,
         override_proxy_provider: NoneOrOne<Arc<ClientProxySelector<TcpClientConnector>>>,
     ) {
@@ -140,19 +140,19 @@ impl TcpServerSetupResult {
 }
 
 #[async_trait]
-pub trait TcpServerHandler: Send + Sync + Debug {
+pub(crate) trait TcpServerHandler: Send + Sync + Debug {
     async fn setup_server_stream(
         &self,
         server_stream: Box<dyn AsyncStream>,
     ) -> std::io::Result<TcpServerSetupResult>;
 }
 
-pub struct TcpClientSetupResult {
-    pub client_stream: Box<dyn AsyncStream>,
+pub(crate) struct TcpClientSetupResult {
+    pub(crate) client_stream: Box<dyn AsyncStream>,
 }
 
 #[async_trait]
-pub trait TcpClientHandler: Send + Sync + Debug {
+pub(crate) trait TcpClientHandler: Send + Sync + Debug {
     async fn setup_client_stream(
         &self,
         server_stream: &mut Box<dyn AsyncStream>,

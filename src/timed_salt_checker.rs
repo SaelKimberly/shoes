@@ -10,14 +10,14 @@ struct TimeEntry {
 }
 
 #[derive(Debug)]
-pub struct TimedSaltChecker {
+pub(crate) struct TimedSaltChecker {
     last_salts: VecDeque<TimeEntry>,
     known_salts: HashSet<Box<[u8]>>,
     timeout_secs: u64,
 }
 
 impl TimedSaltChecker {
-    pub fn new(timeout_secs: u64) -> Self {
+    pub(crate) fn new(timeout_secs: u64) -> Self {
         Self {
             last_salts: VecDeque::with_capacity(2000),
             known_salts: HashSet::with_capacity(2000),

@@ -1,11 +1,11 @@
-pub enum ShadowsocksStreamType {
+pub(crate) enum ShadowsocksStreamType {
     Aead,
     AEAD2022Server,
     AEAD2022Client,
 }
 
 impl ShadowsocksStreamType {
-    pub fn max_payload_len(&self) -> usize {
+    pub(crate) fn max_payload_len(&self) -> usize {
         match self {
             ShadowsocksStreamType::Aead => {
                 // for AEAD ciphers:

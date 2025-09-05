@@ -6,18 +6,18 @@ use crate::util::allocate_vec;
 const DEFAULT_BUFFER_SIZE: usize = 32768;
 const ERROR_ON_BARE_LF: bool = true;
 
-pub struct StreamReader {
+pub(crate) struct StreamReader {
     buf: Box<[u8]>,
     start_offset: usize,
     end_offset: usize,
 }
 
 impl StreamReader {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self::new_with_buffer_size(DEFAULT_BUFFER_SIZE)
     }
 
-    pub fn new_with_buffer_size(buffer_size: usize) -> Self {
+    pub(crate) fn new_with_buffer_size(buffer_size: usize) -> Self {
         // note that `buffer_size` also represents the maximum line length that can be read.
         Self {
             buf: allocate_vec(buffer_size).into_boxed_slice(),
@@ -35,7 +35,7 @@ impl StreamReader {
         self.start_offset = 0;
     }
 
-    pub async fn read_line_bytes<T: AsyncReadExt + Unpin>(
+    pub(crate) async fn read_line_bytes<T: AsyncReadExt + Unpin>(
         &mut self,
         stream: &mut T,
     ) -> std::io::Result<&mut [u8]> {
@@ -86,7 +86,7 @@ impl StreamReader {
         }
     }
 
-    pub async fn read_line<T: AsyncReadExt + Unpin>(
+    pub(crate) async fn read_line<T: AsyncReadExt + Unpin>(
         &mut self,
         stream: &mut T,
     ) -> std::io::Result<&str> {
@@ -99,7 +99,7 @@ impl StreamReader {
         })
     }
 
-    pub async fn read_u8<T: AsyncReadExt + Unpin>(
+    pub(crate) async fn read_u8<T: AsyncReadExt + Unpin>(
         &mut self,
         stream: &mut T,
     ) -> std::io::Result<u8> {
@@ -117,7 +117,7 @@ impl StreamReader {
         Ok(value)
     }
 
-    pub async fn read_u16_be<T: AsyncReadExt + Unpin>(
+    pub(crate) async fn read_u16_be<T: AsyncReadExt + Unpin>(
         &mut self,
         stream: &mut T,
     ) -> std::io::Result<u16> {
@@ -136,7 +136,7 @@ impl StreamReader {
         Ok(value)
     }
 
-    pub async fn read_slice<T: AsyncReadExt + Unpin>(
+    pub(crate) async fn read_slice<T: AsyncReadExt + Unpin>(
         &mut self,
         stream: &mut T,
         len: usize,
@@ -165,7 +165,7 @@ impl StreamReader {
         Ok(slice)
     }
     #[cfg(feature = "vmess")]
-    pub async fn read_slice_into<T: AsyncReadExt + Unpin>(
+    pub(crate) async fn read_slice_into<T: AsyncReadExt + Unpin>(
         &mut self,
         stream: &mut T,
         buf: &mut [u8],
@@ -175,11 +175,11 @@ impl StreamReader {
         Ok(())
     }
 
-    pub fn unparsed_data(&self) -> &[u8] {
+    pub(crate) fn unparsed_data(&self) -> &[u8] {
         &self.buf[self.start_offset..self.end_offset]
     }
 
-    pub fn unparsed_data_owned(&self) -> Option<Box<[u8]>> {
+    pub(crate) fn unparsed_data_owned(&self) -> Option<Box<[u8]>> {
         let unparsed_data = self.unparsed_data();
         if unparsed_data.is_empty() {
             None

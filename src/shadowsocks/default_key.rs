@@ -4,13 +4,13 @@ use super::shadowsocks_key::ShadowsocksKey;
 use crate::util::allocate_vec;
 
 #[derive(Debug, Clone)]
-pub struct DefaultKey {
+pub(crate) struct DefaultKey {
     key_bytes: Box<[u8]>,
     key_len: usize,
 }
 
 impl DefaultKey {
-    pub fn new(password: &str, key_len: usize) -> Self {
+    pub(crate) fn new(password: &str, key_len: usize) -> Self {
         Self {
             key_bytes: get_key_bytes(password, key_len),
             key_len,

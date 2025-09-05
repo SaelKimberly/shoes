@@ -9,9 +9,9 @@ pub enum Address {
 }
 
 impl Address {
-    pub const UNSPECIFIED: Self = Address::Ipv4(Ipv4Addr::UNSPECIFIED);
+    pub(crate) const UNSPECIFIED: Self = Address::Ipv4(Ipv4Addr::UNSPECIFIED);
 
-    pub fn from(s: &str) -> std::io::Result<Self> {
+    pub(crate) fn from(s: &str) -> std::io::Result<Self> {
         let mut dots = 0;
         let mut possible_ipv4 = true;
         let mut possible_ipv6 = true;
@@ -59,15 +59,15 @@ impl Address {
         ))
     }
 
-    pub fn is_ipv6(&self) -> bool {
+    pub(crate) fn is_ipv6(&self) -> bool {
         matches!(self, Address::Ipv6(_))
     }
 
-    pub fn is_hostname(&self) -> bool {
+    pub(crate) fn is_hostname(&self) -> bool {
         matches!(self, Address::Hostname(_))
     }
 
-    pub fn hostname(&self) -> Option<&str> {
+    pub(crate) fn hostname(&self) -> Option<&str> {
         match self {
             Address::Hostname(hostname) => Some(hostname),
             _ => None,
@@ -92,13 +92,13 @@ pub struct NetLocation {
 }
 
 impl NetLocation {
-    pub const UNSPECIFIED: Self = NetLocation::new(Address::UNSPECIFIED, 0);
+    pub(crate) const UNSPECIFIED: Self = NetLocation::new(Address::UNSPECIFIED, 0);
 
     pub const fn new(address: Address, port: u16) -> Self {
         Self { address, port }
     }
 
-    pub fn _is_unspecified(&self) -> bool {
+    pub(crate) fn _is_unspecified(&self) -> bool {
         self == &Self::UNSPECIFIED
     }
 
@@ -124,7 +124,7 @@ impl NetLocation {
         Ok(Self { address, port })
     }
 
-    pub fn from_ip_addr(ip: IpAddr, port: u16) -> Self {
+    pub const fn from_ip_addr(ip: IpAddr, port: u16) -> Self {
         let address = match ip {
             IpAddr::V4(addr) => Address::Ipv4(addr),
             IpAddr::V6(addr) => Address::Ipv6(addr),
@@ -132,7 +132,7 @@ impl NetLocation {
         Self { address, port }
     }
 
-    pub fn components(&self) -> (&Address, u16) {
+    pub const fn components(&self) -> (&Address, u16) {
         (&self.address, self.port)
     }
 
@@ -140,11 +140,11 @@ impl NetLocation {
         (self.address, self.port)
     }
 
-    pub fn address(&self) -> &Address {
+    pub const fn address(&self) -> &Address {
         &self.address
     }
 
-    pub fn port(&self) -> u16 {
+    pub const fn port(&self) -> u16 {
         self.port
     }
 
@@ -188,7 +188,7 @@ impl From<NetLocation> for NetLocationPortRange {
 }
 
 impl NetLocationPortRange {
-    pub fn new(address: Address, mut ports: Vec<u16>) -> std::io::Result<Self> {
+    pub(crate) fn new(address: Address, mut ports: Vec<u16>) -> std::io::Result<Self> {
         ports.sort_unstable();
         ports.dedup();
         if ports.is_empty() {
@@ -200,7 +200,7 @@ impl NetLocationPortRange {
         Ok(Self { address, ports })
     }
 
-    pub fn from_str(s: &str) -> std::io::Result<Self> {
+    pub(crate) fn from_str(s: &str) -> std::io::Result<Self> {
         // Split address and port specification
         let (address_str, port_str) = match s.rfind(':') {
             Some(i) => (&s[0..i], &s[i + 1..]),
@@ -268,7 +268,7 @@ impl NetLocationPortRange {
         Self::new(address, ports)
     }
 
-    pub fn to_socket_addrs(&self) -> std::io::Result<Vec<SocketAddr>> {
+    pub(crate) fn to_socket_addrs(&self) -> std::io::Result<Vec<SocketAddr>> {
         let mut socket_addrs = Vec::with_capacity(self.ports.len());
 
         match &self.address {
@@ -366,12 +366,12 @@ pub struct AddressMask {
 }
 
 impl AddressMask {
-    pub const ANY: Self = AddressMask {
+    pub(crate) const ANY: Self = AddressMask {
         address: Address::UNSPECIFIED,
         netmask: 0,
     };
 
-    pub fn from(s: &str) -> std::io::Result<Self> {
+    pub(crate) fn from(s: &str) -> std::io::Result<Self> {
         let (address_str, num_bits) = match s.rfind('/') {
             Some(i) => {
                 let num_bits = s[i + 1..]
@@ -465,12 +465,12 @@ pub struct NetLocationMask {
 }
 
 impl NetLocationMask {
-    pub const ANY: Self = NetLocationMask {
+    pub(crate) const ANY: Self = NetLocationMask {
         address_mask: AddressMask::ANY,
         port: 0,
     };
 
-    pub fn from(s: &str) -> std::io::Result<Self> {
+    pub(crate) fn from(s: &str) -> std::io::Result<Self> {
         let (address_mask_str, port) = match s.find(':') {
             Some(i) => {
                 let port = s[i + 1..]

@@ -21,7 +21,7 @@ const WRITE_BUF_LEN: usize = 16389;
 const CONTENT_TYPE_ALERT: u8 = 0x15;
 const CONTENT_TYPE_APPLICATION_DATA: u8 = 0x17;
 
-pub struct ShadowTlsStream {
+pub(crate) struct ShadowTlsStream {
     stream: Box<dyn AsyncStream>,
     read_hmac: ShadowTlsHmac,
     write_hmac: ShadowTlsHmac,
@@ -44,7 +44,7 @@ pub struct ShadowTlsStream {
 }
 
 impl ShadowTlsStream {
-    pub fn new(
+    pub(crate) fn new(
         stream: Box<dyn AsyncStream>,
         initial_processed_data: &[u8],
         read_hmac: ShadowTlsHmac,
@@ -83,7 +83,7 @@ impl ShadowTlsStream {
         })
     }
 
-    pub fn feed_initial_read_data(&mut self, data: &[u8]) -> std::io::Result<()> {
+    pub(crate) fn feed_initial_read_data(&mut self, data: &[u8]) -> std::io::Result<()> {
         assert!(self.unprocessed_end_offset == 0);
 
         if data.len() > self.unprocessed_buf.len() {

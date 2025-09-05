@@ -20,8 +20,8 @@ use crate::shadow_tls::{
 use crate::shadowsocks::ShadowsocksTcpHandler;
 use crate::snell::snell_handler::{SnellClientHandler, SnellServerHandler};
 use crate::socks_handler::SocksTcpClientHandler;
-use crate::tcp_client_connector::TcpClientConnector;
-use crate::tcp_handler::{TcpClientHandler, TcpServerHandler};
+use crate::tcp::tcp_client_connector::TcpClientConnector;
+use crate::tcp::tcp_handler::{TcpClientHandler, TcpServerHandler};
 use crate::tls_handler::{TlsClientHandler, TlsServerHandler, TlsServerTarget};
 use crate::trojan_handler::TrojanTcpHandler;
 use crate::vless_handler::VlessTcpClientHandler;
@@ -47,7 +47,7 @@ fn create_auth_credentials(
     }
 }
 
-pub fn create_tcp_server_handler(
+pub(crate) fn create_tcp_server_handler(
     server_proxy_config: ServerProxyConfig,
     rules_stack: &mut Vec<Vec<RuleConfig>>,
 ) -> Box<dyn TcpServerHandler> {
@@ -337,7 +337,7 @@ fn create_websocket_server_target(
     }
 }
 
-pub fn create_tcp_client_handler(
+pub(crate) fn create_tcp_client_handler(
     client_proxy_config: ClientProxyConfig,
     default_sni_hostname: Option<String>,
 ) -> Box<dyn TcpClientHandler> {
@@ -464,7 +464,7 @@ pub fn create_tcp_client_handler(
     }
 }
 
-pub fn create_tcp_client_proxy_selector(
+pub(crate) fn create_tcp_client_proxy_selector(
     rules: Vec<RuleConfig>,
 ) -> ClientProxySelector<TcpClientConnector> {
     let rules = rules

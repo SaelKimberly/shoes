@@ -2,13 +2,13 @@ use super::shadowsocks_key::ShadowsocksKey;
 use crate::util::allocate_vec;
 
 #[derive(Debug, Clone)]
-pub struct Blake3Key {
+pub(crate) struct Blake3Key {
     key_bytes: Box<[u8]>,
     session_key_len: usize,
 }
 
 impl Blake3Key {
-    pub fn new(key_bytes: Box<[u8]>, session_key_len: usize) -> Self {
+    pub(crate) fn new(key_bytes: Box<[u8]>, session_key_len: usize) -> Self {
         Self {
             key_bytes,
             session_key_len,

@@ -4,7 +4,7 @@ use std::sync::OnceLock;
 
 use rustls::pki_types::pem::PemObject;
 
-pub fn create_client_config(
+pub(crate) fn create_client_config(
     verify_webpki: bool,
     server_fingerprints: Vec<String>,
     alpn_protocols: Vec<String>,
@@ -73,7 +73,7 @@ pub fn create_client_config(
 }
 
 #[derive(Debug)]
-pub struct ServerFingerprintVerifier {
+pub(crate) struct ServerFingerprintVerifier {
     supported_algs: rustls::crypto::WebPkiSupportedAlgorithms,
     server_fingerprints: BTreeSet<Vec<u8>>,
     webpki_verifier: Option<rustls::client::WebPkiServerVerifier>,
@@ -141,7 +141,7 @@ impl rustls::client::danger::ServerCertVerifier for ServerFingerprintVerifier {
 }
 
 #[derive(Debug)]
-pub struct DisabledVerifier {
+pub(crate) struct DisabledVerifier {
     supported_algs: rustls::crypto::WebPkiSupportedAlgorithms,
 }
 
@@ -214,7 +214,7 @@ fn get_root_cert_store() -> Arc<rustls::RootCertStore> {
         .clone()
 }
 
-pub fn create_server_config(
+pub(crate) fn create_server_config(
     cert_bytes: &[u8],
     key_bytes: &[u8],
     ca_cert_bytes: Vec<Vec<u8>>,
@@ -276,7 +276,9 @@ pub fn create_server_config(
     config
 }
 
-pub fn process_fingerprints(client_fingerprints: &[String]) -> std::io::Result<BTreeSet<Vec<u8>>> {
+pub(crate) fn process_fingerprints(
+    client_fingerprints: &[String],
+) -> std::io::Result<BTreeSet<Vec<u8>>> {
     let mut result = BTreeSet::new();
 
     for fingerprint in client_fingerprints {
@@ -308,7 +310,7 @@ pub fn process_fingerprints(client_fingerprints: &[String]) -> std::io::Result<B
 }
 
 #[derive(Debug)]
-pub struct ClientFingerprintVerifier {
+pub(crate) struct ClientFingerprintVerifier {
     supported_algs: rustls::crypto::WebPkiSupportedAlgorithms,
     webpki_verifier: Option<Arc<dyn rustls::server::danger::ClientCertVerifier>>,
     client_fingerprints: BTreeSet<Vec<u8>>,

@@ -11,7 +11,7 @@ use crate::buf_reader::BufReader;
 use crate::shadow_tls::shadow_tls_hmac::ShadowTlsHmac;
 use crate::shadow_tls::shadow_tls_stream::ShadowTlsStream;
 use crate::stream_reader::StreamReader;
-use crate::tcp_handler::{TcpClientHandler, TcpClientSetupResult};
+use crate::tcp::tcp_handler::{TcpClientHandler, TcpClientSetupResult};
 use crate::util::{allocate_vec, write_all}; // Assuming write_all is from crate::util
 
 use super::shadow_tls_server_handler::parse_server_hello;
@@ -28,7 +28,7 @@ const CONTENT_TYPE_ALERT: u8 = 0x15;
 const HANDSHAKE_TYPE_CLIENT_HELLO: u8 = 0x01;
 
 #[derive(Debug)]
-pub struct ShadowTlsClientHandler {
+pub(crate) struct ShadowTlsClientHandler {
     initial_hmac: ShadowTlsHmac,
     client_config: Arc<rustls::ClientConfig>,
     server_name: rustls::pki_types::ServerName<'static>,
@@ -36,7 +36,7 @@ pub struct ShadowTlsClientHandler {
 }
 
 impl ShadowTlsClientHandler {
-    pub fn new(
+    pub(crate) fn new(
         password: String,
         client_config: Arc<rustls::ClientConfig>,
         server_name: rustls::pki_types::ServerName<'static>,

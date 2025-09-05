@@ -3,7 +3,7 @@ use std::os::fd::{FromRawFd, IntoRawFd};
 
 use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 
-pub fn new_udp_socket(
+pub(crate) fn new_udp_socket(
     is_ipv6: bool,
     bind_interface: Option<String>,
 ) -> std::io::Result<tokio::net::UdpSocket> {
@@ -17,7 +17,7 @@ pub fn new_udp_socket(
     into_tokio_udp_socket(socket)
 }
 
-pub fn new_reuse_udp_sockets(
+pub(crate) fn new_reuse_udp_sockets(
     is_ipv6: bool,
     bind_interface: Option<String>,
     count: usize,
@@ -55,7 +55,7 @@ fn get_unspecified_socket_addr(is_ipv6: bool) -> SocketAddr {
     }
 }
 
-pub fn new_socket2_udp_socket(
+pub(crate) fn new_socket2_udp_socket(
     is_ipv6: bool,
     bind_interface: Option<String>,
     bind_address: Option<SocketAddr>,
@@ -96,7 +96,7 @@ fn into_tokio_udp_socket(socket: socket2::Socket) -> std::io::Result<tokio::net:
     tokio::net::UdpSocket::from_std(std_udp_socket)
 }
 
-pub fn new_tcp_socket(
+pub(crate) fn new_tcp_socket(
     bind_interface: Option<String>,
     is_ipv6: bool,
 ) -> std::io::Result<tokio::net::TcpSocket> {

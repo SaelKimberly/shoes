@@ -5,16 +5,16 @@ use async_trait::async_trait;
 use crate::address::NetLocation;
 use crate::async_stream::AsyncStream;
 use crate::option_util::NoneOrOne;
-use crate::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
+use crate::tcp::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
 
 #[derive(Debug)]
-pub struct PortForwardServerHandler {
+pub(crate) struct PortForwardServerHandler {
     targets: Vec<NetLocation>,
     next_target_index: AtomicU32,
 }
 
 impl PortForwardServerHandler {
-    pub fn new(targets: Vec<NetLocation>) -> Self {
+    pub(crate) fn new(targets: Vec<NetLocation>) -> Self {
         Self {
             targets,
             next_target_index: AtomicU32::new(0),
