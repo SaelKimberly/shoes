@@ -16,6 +16,7 @@ There are four main configuration types:
 You can define PEM files (containing certificates and/or private keys) once and reference them throughout your configuration. This is particularly useful when the same certificate/key pair is used in multiple places.
 
 ### Named PEM
+
 ```yaml
 pem: string                 # Name identifier for the PEM data
 path: string                # File path to PEM file
@@ -24,6 +25,7 @@ data: string                # Inline PEM-encoded data
 ```
 
 **Note**: A single PEM file can contain:
+
 - Just a certificate
 - Just a private key
 - Both certificate and private key
@@ -57,6 +59,7 @@ rules: string | RuleConfig    # Optional; defaults to allow-all-direct if omitte
 ### Server Protocols
 
 #### HTTP/SOCKS5 Proxy
+
 ```yaml
 protocol:
   type: http | socks
@@ -65,6 +68,7 @@ protocol:
 ```
 
 #### Shadowsocks
+
 ```yaml
 protocol:
   type: shadowsocks | ss
@@ -73,6 +77,7 @@ protocol:
 ```
 
 #### Snell
+
 ```yaml
 protocol:
   type: snell
@@ -83,6 +88,7 @@ protocol:
 ```
 
 #### VLESS
+
 ```yaml
 protocol:
   type: vless
@@ -90,6 +96,7 @@ protocol:
 ```
 
 #### Trojan
+
 ```yaml
 protocol:
   type: trojan
@@ -100,6 +107,7 @@ protocol:
 ```
 
 #### VMess
+
 ```yaml
 protocol:
   type: vmess
@@ -110,6 +118,7 @@ protocol:
 ```
 
 #### TLS Server
+
 ```yaml
 protocol:
   type: tls
@@ -132,6 +141,7 @@ protocol:
 ```
 
 #### ShadowTLS v3 (in-process handshake)
+
 ```yaml
 protocol:
   type: shadowtls
@@ -153,6 +163,7 @@ protocol:
 ```
 
 #### ShadowTLS v3 (remote handshake server)
+
 ```yaml
 protocol:
   type: shadowtls
@@ -171,6 +182,7 @@ protocol:
 ```
 
 #### WebSocket
+
 ```yaml
 protocol:
   type: websocket | ws
@@ -184,6 +196,7 @@ protocol:
 ```
 
 #### Port Forward
+
 ```yaml
 protocol:
   type: forward | port_forward
@@ -191,6 +204,7 @@ protocol:
 ```
 
 #### Hysteria2
+
 ```yaml
 protocol:
   type: hysteria2
@@ -199,6 +213,7 @@ protocol:
 ```
 
 #### Tuic v5
+
 ```yaml
 protocol:
   type: tuic | tuicv5
@@ -211,12 +226,14 @@ protocol:
 Client protocols (`ClientProxyConfig`) include all server protocols plus:
 
 #### Direct Connection
+
 ```yaml
 protocol:
   type: direct
 ```
 
 #### TLS Client
+
 ```yaml
 protocol:
   type: tls
@@ -230,6 +247,7 @@ protocol:
 ```
 
 #### WebSocket Client
+
 ```yaml
 protocol:
   type: websocket | ws
@@ -292,9 +310,11 @@ client_proxies: string | ClientConfig | [string | ClientConfig]  # Required for 
 The system includes these built-in defaults:
 
 ### Client Groups
+
 - `direct`: Direct connections without proxy
 
 ### Rule Groups
+
 - `allow-all-direct`: Allows all traffic directly
 - `block-all`: Blocks all traffic
 
@@ -327,12 +347,14 @@ The system includes these built-in defaults:
 Certificates and keys can be specified in three ways:
 
 1. **File Path**: Provide the path to a PEM-encoded file
+
    ```yaml
    cert: "/etc/certs/server.pem"
    key: "/etc/certs/server.pem"  # Can be the same file if it contains both
    ```
 
 2. **Inline PEM Data**: Embed the PEM data directly in the configuration
+
    ```yaml
    cert: |
      -----BEGIN CERTIFICATE-----
@@ -345,6 +367,7 @@ Certificates and keys can be specified in three ways:
    ```
 
 3. **Named PEM Reference**: Reference a previously defined named PEM
+
    ```yaml
    cert: "my-server-pem"  # References a named PEM (certificate portion will be used)
    key: "my-server-pem"   # References a named PEM (private key portion will be used)
@@ -390,6 +413,7 @@ Certificates and keys can be specified in three ways:
 ```
 
 ### Basic HTTP Proxy Server
+
 ```yaml
 bind_location: "127.0.0.1:8080"
 protocol:
@@ -399,6 +423,7 @@ protocol:
 ```
 
 ### SOCKS5 with TLS
+
 ```yaml
 bind_location: "0.0.0.0:1080"
 protocol:
@@ -414,6 +439,7 @@ protocol:
 ```
 
 ### VMess over WebSocket
+
 ```yaml
 bind_location: "0.0.0.0:443"
 protocol:
@@ -427,6 +453,7 @@ protocol:
 ```
 
 ### Complex Routing Setup
+
 ```yaml
 # Define client proxies
 client_group: "proxies"
@@ -458,6 +485,7 @@ rules: routing
 ```
 
 ### Hysteria2 Proxy Server
+
 ```yaml
 bind_location: "0.0.0.0:4443"
 protocol:
@@ -467,6 +495,7 @@ protocol:
 ```
 
 ### Tuic v5 Proxy Server
+
 ```yaml
 bind_location: "0.0.0.0:5555"
 protocol:
