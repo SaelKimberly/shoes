@@ -90,3 +90,22 @@ tikv-jemallocator = "0.6"
 opt-level = 3
 lto = "fat"
 strip = true
+
+[features]
+default = ["full"]
+
+socks = []
+socks4 = ["socks"]
+socks5 = ["socks"]
+
+vless = []
+vmess = []
+
+trojan = []
+
+ss = ["shadowsocks"]
+shadowsocks = []
+
+hysteria = []
+
+full = ["socks", "vless", "trojan", "vmess", "shadowsocks", "hysteria"]

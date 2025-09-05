@@ -85,7 +85,7 @@ impl ResolverCache {
     pub fn new(resolver: Arc<dyn Resolver>) -> Self {
         Self::new_with_timeout(resolver, Self::DEFAULT_RESULT_TIMEOUT_SECS)
     }
-
+    #[cfg(feature = "hysteria")]
     pub fn resolve_location<'a, 'b>(
         &'a mut self,
         target: &'b NetLocation,
@@ -161,12 +161,12 @@ impl ResolverCache {
         }
     }
 }
-
+#[cfg(feature = "hysteria")]
 pub struct ResolveLocation<'a, 'b> {
     resolver_cache: &'a mut ResolverCache,
     target: &'b NetLocation,
 }
-
+#[cfg(feature = "hysteria")]
 impl Future for ResolveLocation<'_, '_> {
     type Output = std::io::Result<SocketAddr>;
 

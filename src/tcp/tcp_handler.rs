@@ -4,10 +4,13 @@ use std::sync::Arc;
 use async_trait::async_trait;
 
 use crate::address::NetLocation;
-use crate::async_stream::{AsyncMessageStream, AsyncStream, AsyncTargetedMessageStream};
+use crate::async_stream::{AsyncStream, AsyncTargetedMessageStream};
 use crate::client_proxy_selector::ClientProxySelector;
 use crate::option_util::NoneOrOne;
 use crate::tcp_client_connector::TcpClientConnector;
+
+#[cfg(any(feature = "vmess", feature = "vless"))]
+use crate::async_stream::AsyncMessageStream;
 
 pub enum TcpServerSetupResult {
     TcpForward {
@@ -21,6 +24,7 @@ pub enum TcpServerSetupResult {
         initial_remote_data: Option<Box<[u8]>>,
         override_proxy_provider: NoneOrOne<Arc<ClientProxySelector<TcpClientConnector>>>,
     },
+    #[cfg(any(feature = "vmess", feature = "vless"))]
     // TODO: support udp client proxy selector
     BidirectionalUdp {
         need_initial_flush: bool,
@@ -38,6 +42,7 @@ pub enum TcpServerSetupResult {
 
 impl TcpServerSetupResult {
     pub fn set_need_initial_flush(&mut self, need_initial_flush: bool) {
+        #[cfg(any(feature = "vmess", feature = "vless"))]
         match self {
             TcpServerSetupResult::TcpForward {
                 need_initial_flush: flush,
@@ -54,8 +59,22 @@ impl TcpServerSetupResult {
                 *flush = need_initial_flush;
             }
         }
+        #[cfg(not(any(feature = "vmess", feature = "vless")))]
+        match self {
+            TcpServerSetupResult::TcpForward {
+                need_initial_flush: flush,
+                ..
+            }
+            | TcpServerSetupResult::MultiDirectionalUdp {
+                need_initial_flush: flush,
+                ..
+            } => {
+                *flush = need_initial_flush;
+            }
+        }
     }
     pub fn override_proxy_provider_unspecified(&self) -> bool {
+        #[cfg(any(feature = "vmess", feature = "vless"))]
         match self {
             TcpServerSetupResult::TcpForward {
                 override_proxy_provider,
@@ -70,18 +89,43 @@ impl TcpServerSetupResult {
                 ..
             } => override_proxy_provider.is_unspecified(),
         }
+        #[cfg(not(any(feature = "vmess", feature = "vless")))]
+        match self {
+            TcpServerSetupResult::TcpForward {
+                override_proxy_provider,
+                ..
+            }
+            | TcpServerSetupResult::MultiDirectionalUdp {
+                override_proxy_provider,
+                ..
+            } => override_proxy_provider.is_unspecified(),
+        }
     }
 
     pub fn set_override_proxy_provider(
         &mut self,
         override_proxy_provider: NoneOrOne<Arc<ClientProxySelector<TcpClientConnector>>>,
     ) {
+        #[cfg(any(feature = "vmess", feature = "vless"))]
         match self {
             TcpServerSetupResult::TcpForward {
                 override_proxy_provider: provider,
                 ..
             }
             | TcpServerSetupResult::BidirectionalUdp {
+                override_proxy_provider: provider,
+                ..
+            }
+            | TcpServerSetupResult::MultiDirectionalUdp {
+                override_proxy_provider: provider,
+                ..
+            } => {
+                *provider = override_proxy_provider;
+            }
+        }
+        #[cfg(not(any(feature = "vmess", feature = "vless")))]
+        match self {
+            TcpServerSetupResult::TcpForward {
                 override_proxy_provider: provider,
                 ..
             }

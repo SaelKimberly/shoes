@@ -1,17 +1,20 @@
 use std::net::{Ipv4Addr, Ipv6Addr};
-use std::sync::OnceLock;
 
 use async_trait::async_trait;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 use crate::address::{Address, NetLocation};
 use crate::async_stream::AsyncStream;
-use crate::option_util::NoneOrOne;
 use crate::stream_reader::StreamReader;
-use crate::tcp_handler::{
-    TcpClientHandler, TcpClientSetupResult, TcpServerHandler, TcpServerSetupResult,
-};
+use crate::tcp_handler::{TcpClientHandler, TcpClientSetupResult};
 use crate::util::write_all;
+
+#[cfg(feature = "socks")]
+use crate::option_util::NoneOrOne;
+#[cfg(feature = "socks")]
+use crate::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
+#[cfg(feature = "socks")]
+use std::sync::OnceLock;
 
 pub const VER_SOCKS5: u8 = 0x05;
 pub const VER_AUTH: u8 = 0x01;
@@ -29,17 +32,20 @@ pub const RESULT_SUCCESS: u8 = 0x0;
 pub const CMD_CONNECT: u8 = 0x01;
 pub const CMD_UDP_ASSOCIATE: u8 = 0x03;
 
+#[cfg(feature = "socks")]
 #[derive(Debug)]
 pub struct SocksTcpServerHandler {
     auth_info: Option<(String, String)>,
 }
 
+#[cfg(feature = "socks")]
 impl SocksTcpServerHandler {
     pub fn new(auth_info: Option<(String, String)>) -> Self {
         Self { auth_info }
     }
 }
 
+#[cfg(feature = "socks")]
 #[async_trait]
 impl TcpServerHandler for SocksTcpServerHandler {
     async fn setup_server_stream(

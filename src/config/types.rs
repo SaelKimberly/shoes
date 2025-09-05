@@ -560,6 +560,7 @@ pub enum ServerProxyConfig {
         #[serde(default)]
         tls_buffer_size: Option<usize>,
     },
+
     Vmess {
         cipher: String,
         user_id: String,
@@ -1017,8 +1018,13 @@ mod tests {
     use crate::config::{convert_cert_paths, create_server_configs};
     use crate::option_util::*;
     use std::collections::HashMap;
-    use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+    use std::net::{IpAddr, Ipv4Addr};
+
+    #[cfg(feature = "shadowsocks")]
     use std::path::PathBuf;
+
+    #[cfg(feature = "vless")]
+    use std::net::Ipv6Addr;
 
     async fn validate_configs_test(configs: Vec<Config>) -> std::io::Result<Vec<ServerConfig>> {
         let (converted_configs, _) = convert_cert_paths(configs).await?;
@@ -1041,6 +1047,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "socks")]
     fn create_test_server_config_socks() -> ServerConfig {
         ServerConfig {
             bind_location: BindLocation::Address(
@@ -1056,7 +1063,7 @@ mod tests {
             rules: NoneOrSome::None,
         }
     }
-
+    #[cfg(feature = "shadowsocks")]
     fn create_test_server_config_shadowsocks() -> ServerConfig {
         ServerConfig {
             bind_location: BindLocation::Path(PathBuf::from("/tmp/ss.sock")),
@@ -1071,6 +1078,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "vless")]
     fn create_test_server_config_vless() -> ServerConfig {
         ServerConfig {
             bind_location: BindLocation::Address(
@@ -1095,6 +1103,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "trojan")]
     fn create_test_server_config_trojan() -> ServerConfig {
         ServerConfig {
             bind_location: BindLocation::Address(
@@ -1159,7 +1168,7 @@ mod tests {
             rules: NoneOrSome::None,
         }
     }
-
+    #[cfg(feature = "vmess")]
     fn create_test_server_config_vmess() -> ServerConfig {
         ServerConfig {
             bind_location: BindLocation::Address(
@@ -1219,7 +1228,7 @@ mod tests {
             rules: NoneOrSome::None,
         }
     }
-
+    #[cfg(feature = "hysteria")]
     fn create_test_server_config_hysteria2() -> ServerConfig {
         ServerConfig {
             bind_location: BindLocation::Address(
@@ -1316,6 +1325,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "socks")]
     #[test]
     fn test_server_config_socks() {
         let original = vec![Config::Server(create_test_server_config_socks())];
@@ -1330,7 +1340,7 @@ mod tests {
             panic!("Expected server config");
         }
     }
-
+    #[cfg(feature = "shadowsocks")]
     #[test]
     fn test_server_config_shadowsocks() {
         let original = vec![Config::Server(create_test_server_config_shadowsocks())];
@@ -1347,6 +1357,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "vless")]
     #[test]
     fn test_server_config_vless() {
         let original = vec![Config::Server(create_test_server_config_vless())];
@@ -1362,6 +1373,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "trojan")]
     #[test]
     fn test_server_config_trojan() {
         let original = vec![Config::Server(create_test_server_config_trojan())];
@@ -1391,7 +1403,7 @@ mod tests {
             panic!("Expected server config");
         }
     }
-
+    #[cfg(feature = "vmess")]
     #[test]
     fn test_server_config_vmess() {
         let original = vec![Config::Server(create_test_server_config_vmess())];
@@ -1442,7 +1454,7 @@ mod tests {
             panic!("Expected server config");
         }
     }
-
+    #[cfg(feature = "hysteria")]
     #[test]
     fn test_server_config_hysteria2() {
         let original = vec![Config::Server(create_test_server_config_hysteria2())];
@@ -1543,6 +1555,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "shadowsocks")]
     #[test]
     fn test_mixed_config() {
         let original = vec![
@@ -2041,6 +2054,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "hysteria")]
     #[tokio::test]
     async fn test_quic_with_named_pems() {
         // Test QUIC server with named PEM

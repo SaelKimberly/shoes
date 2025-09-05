@@ -1,3 +1,4 @@
+#![cfg(feature = "vless")]
 use std::io::{Error, ErrorKind, Result};
 use std::pin::Pin;
 use std::task::{Context, Poll};

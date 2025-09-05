@@ -13,14 +13,19 @@ use crate::async_stream::{AsyncSourcedMessageStream, AsyncStream};
 use crate::client_proxy_selector::{ClientProxySelector, ConnectDecision};
 use crate::config::{BindLocation, ConfigSelection, ServerConfig, TcpConfig};
 use crate::copy_bidirectional::copy_bidirectional;
-use crate::copy_bidirectional_message::copy_bidirectional_message;
+
 use crate::copy_multidirectional_message::copy_multidirectional_message;
-use crate::resolver::{NativeResolver, Resolver, resolve_single_address};
+use crate::resolver::{NativeResolver, Resolver};
 use crate::tcp_client_connector::TcpClientConnector;
 use crate::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
 use crate::tcp_handler_util::{create_tcp_client_proxy_selector, create_tcp_server_handler};
 use crate::udp_message_stream::UdpMessageStream;
 use crate::udp_multi_message_stream::UdpMultiMessageStream;
+
+#[cfg(any(feature = "vmess", feature = "vless"))]
+use crate::copy_bidirectional_message::copy_bidirectional_message;
+#[cfg(any(feature = "vmess", feature = "vless"))]
+use crate::resolver::resolve_single_address;
 
 async fn run_tcp_server(
     bind_address: SocketAddr,
@@ -220,6 +225,7 @@ where
             copy_result?;
             Ok(())
         }
+        #[cfg(any(feature = "vmess", feature = "vless"))]
         TcpServerSetupResult::BidirectionalUdp {
             remote_location,
             stream: mut server_stream,

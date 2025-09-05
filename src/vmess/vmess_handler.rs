@@ -1,16 +1,14 @@
-use std::collections::HashMap;
-use std::net::{Ipv4Addr, Ipv6Addr};
 use std::time::SystemTime;
 
 use aes::Aes128;
-use aes::cipher::{BlockDecrypt, BlockEncrypt, KeyIvInit};
+use aes::cipher::{BlockEncrypt, KeyIvInit};
 use async_trait::async_trait;
 use aws_lc_rs::aead::{
     AES_128_GCM, Aad, BoundKey, CHACHA20_POLY1305, OpeningKey, SealingKey, UnboundKey,
 };
 use cfb_mode::cipher::AsyncStreamCipher;
 use digest::KeyInit;
-use parking_lot::Mutex;
+
 use rand::{Rng, RngCore};
 use sha3::Shake128;
 use sha3::digest::{ExtendableOutput, Update};
@@ -19,16 +17,31 @@ use tokio::io::AsyncWriteExt;
 use super::fnv1a::Fnv1aHasher;
 use super::md5::{compute_hmac_md5, compute_md5, compute_md5_repeating, create_chacha_key};
 use super::nonce::{SingleUseNonce, VmessNonceSequence};
-use super::typed::{Aes128CfbDec, Aes128CfbEnc};
+use super::typed::Aes128CfbEnc;
 use super::vmess_stream::{ReadHeaderInfo, VmessStream};
 use crate::address::{Address, NetLocation};
 use crate::async_stream::AsyncStream;
+use crate::tcp_handler::{TcpClientHandler, TcpClientSetupResult};
+use crate::util::{parse_uuid, write_all};
+
+#[cfg(feature = "vmess")]
+use super::typed::Aes128CfbDec;
+#[cfg(feature = "vmess")]
 use crate::option_util::NoneOrOne;
+#[cfg(feature = "vmess")]
 use crate::stream_reader::StreamReader;
-use crate::tcp_handler::{
-    TcpClientHandler, TcpClientSetupResult, TcpServerHandler, TcpServerSetupResult,
-};
-use crate::util::{allocate_vec, parse_uuid, write_all};
+#[cfg(feature = "vmess")]
+use crate::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
+#[cfg(feature = "vmess")]
+use crate::util::allocate_vec;
+#[cfg(feature = "vmess")]
+use aes::cipher::BlockDecrypt;
+#[cfg(feature = "vmess")]
+use parking_lot::Mutex;
+#[cfg(feature = "vmess")]
+use std::collections::HashMap;
+#[cfg(feature = "vmess")]
+use std::net::{Ipv4Addr, Ipv6Addr};
 
 const TAG_LEN: usize = 16;
 
@@ -53,16 +66,16 @@ impl From<&str> for DataCipher {
         }
     }
 }
-
+#[cfg(feature = "vmess")]
 type UserHash = [u8; 16];
-
+#[cfg(feature = "vmess")]
 #[derive(Debug)]
 struct CertHashProvider {
     user_key: [u8; 16],
     hashes: HashMap<UserHash, u64>,
     last_hash_time_secs: u64,
 }
-
+#[cfg(feature = "vmess")]
 impl CertHashProvider {
     pub fn new(user_id_bytes: &[u8]) -> Self {
         if user_id_bytes.len() != 16 {
@@ -110,6 +123,7 @@ impl CertHashProvider {
     }
 }
 
+#[cfg(feature = "vmess")]
 #[derive(Debug)]
 pub struct VmessTcpServerHandler {
     data_cipher: DataCipher,
@@ -118,7 +132,7 @@ pub struct VmessTcpServerHandler {
     cert_hash_provider: Option<Mutex<CertHashProvider>>,
     udp_enabled: bool,
 }
-
+#[cfg(feature = "vmess")]
 impl VmessTcpServerHandler {
     pub fn new(cipher_name: &str, user_id: &str, force_aead: bool, udp_enabled: bool) -> Self {
         let mut user_id_bytes = parse_uuid(user_id).unwrap();
@@ -143,7 +157,7 @@ impl VmessTcpServerHandler {
         }
     }
 }
-
+#[cfg(feature = "vmess")]
 #[async_trait]
 impl TcpServerHandler for VmessTcpServerHandler {
     async fn setup_server_stream(
@@ -644,13 +658,13 @@ impl TcpServerHandler for VmessTcpServerHandler {
         }
     }
 }
-
+#[cfg(feature = "vmess")]
 #[allow(clippy::large_enum_variant)]
 enum HeaderReader {
     AesCfb(AesCfbHeaderReader),
     Aead(AeadHeaderReader),
 }
-
+#[cfg(feature = "vmess")]
 impl HeaderReader {
     async fn read_slice_into(
         &mut self,
@@ -671,11 +685,13 @@ impl HeaderReader {
     }
 }
 
+#[cfg(feature = "vmess")]
 struct AesCfbHeaderReader {
     server_stream: Box<dyn AsyncStream>,
     request_cipher: Aes128CfbDec,
 }
 
+#[cfg(feature = "vmess")]
 impl AesCfbHeaderReader {
     async fn read_slice_into(
         &mut self,
@@ -694,12 +710,13 @@ impl AesCfbHeaderReader {
     }
 }
 
+#[cfg(feature = "vmess")]
 struct AeadHeaderReader {
     server_stream: Box<dyn AsyncStream>,
     decrypted_header: Box<[u8]>,
     cursor: usize,
 }
-
+#[cfg(feature = "vmess")]
 impl AeadHeaderReader {
     fn read_slice_into(&mut self, data: &mut [u8]) -> std::io::Result<()> {
         let len = data.len();

@@ -1,3 +1,4 @@
+#![cfg(feature = "hysteria")]
 use rustc_hash::FxHashMap;
 use std::collections::hash_map::Entry;
 use std::net::SocketAddr;

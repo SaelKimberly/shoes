@@ -14,10 +14,9 @@ use crate::config::{
     BindLocation, ConfigSelection, ServerConfig, ServerProxyConfig, ServerQuicConfig,
 };
 use crate::copy_bidirectional::copy_bidirectional;
-use crate::copy_bidirectional_message::copy_bidirectional_message;
 use crate::copy_multidirectional_message::copy_multidirectional_message;
 use crate::quic_stream::QuicStream;
-use crate::resolver::{NativeResolver, Resolver, resolve_single_address};
+use crate::resolver::{NativeResolver, Resolver};
 use crate::rustls_util::create_server_config;
 use crate::socket_util::new_socket2_udp_socket;
 use crate::tcp_client_connector::TcpClientConnector;
@@ -27,6 +26,11 @@ use crate::tcp_server::setup_client_stream;
 use crate::udp_message_stream::UdpMessageStream;
 use crate::udp_multi_message_stream::UdpMultiMessageStream;
 use crate::util::parse_uuid;
+
+#[cfg(any(feature = "vmess", feature = "vless"))]
+use crate::copy_bidirectional_message::copy_bidirectional_message;
+#[cfg(any(feature = "vmess", feature = "vless"))]
+use crate::resolver::resolve_single_address;
 
 async fn start_quic_server(
     bind_address: SocketAddr,
@@ -221,6 +225,7 @@ async fn process_streams(
             copy_result?;
             Ok(())
         }
+        #[cfg(any(feature = "vmess", feature = "vless"))]
         TcpServerSetupResult::BidirectionalUdp {
             remote_location,
             stream: mut server_stream,
@@ -387,6 +392,7 @@ pub async fn start_quic_servers(config: ServerConfig) -> std::io::Result<Vec<Joi
     let mut handles = vec![];
 
     match protocol {
+        #[cfg(feature = "hysteria")]
         ServerProxyConfig::Hysteria2 {
             password,
             udp_enabled,

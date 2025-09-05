@@ -164,7 +164,7 @@ impl StreamReader {
         }
         Ok(slice)
     }
-
+    #[cfg(feature = "vmess")]
     pub async fn read_slice_into<T: AsyncReadExt + Unpin>(
         &mut self,
         stream: &mut T,

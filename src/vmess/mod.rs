@@ -6,4 +6,7 @@ mod sha2;
 mod typed;
 mod vmess_handler;
 mod vmess_stream;
-pub use vmess_handler::{VmessTcpClientHandler, VmessTcpServerHandler};
+pub use vmess_handler::VmessTcpClientHandler;
+
+#[cfg(feature = "vmess")]
+pub use vmess_handler::VmessTcpServerHandler;

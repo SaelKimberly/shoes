@@ -19,16 +19,23 @@ use crate::shadow_tls::{
 };
 use crate::shadowsocks::ShadowsocksTcpHandler;
 use crate::snell::snell_handler::{SnellClientHandler, SnellServerHandler};
-use crate::socks_handler::{SocksTcpClientHandler, SocksTcpServerHandler};
+use crate::socks_handler::SocksTcpClientHandler;
 use crate::tcp_client_connector::TcpClientConnector;
 use crate::tcp_handler::{TcpClientHandler, TcpServerHandler};
 use crate::tls_handler::{TlsClientHandler, TlsServerHandler, TlsServerTarget};
 use crate::trojan_handler::TrojanTcpHandler;
-use crate::vless_handler::{VlessTcpClientHandler, VlessTcpServerHandler};
-use crate::vmess::{VmessTcpClientHandler, VmessTcpServerHandler};
+use crate::vless_handler::VlessTcpClientHandler;
+use crate::vmess::VmessTcpClientHandler;
 use crate::websocket::{
     WebsocketServerTarget, WebsocketTcpClientHandler, WebsocketTcpServerHandler,
 };
+
+#[cfg(feature = "socks")]
+use crate::socks_handler::SocksTcpServerHandler;
+#[cfg(feature = "vless")]
+use crate::vless_handler::VlessTcpServerHandler;
+#[cfg(feature = "vmess")]
+use crate::vmess::VmessTcpServerHandler;
 
 fn create_auth_credentials(
     username: Option<String>,
@@ -48,9 +55,11 @@ pub fn create_tcp_server_handler(
         ServerProxyConfig::Http { username, password } => Box::new(HttpTcpServerHandler::new(
             create_auth_credentials(username, password),
         )),
+        #[cfg(feature = "socks")]
         ServerProxyConfig::Socks { username, password } => Box::new(SocksTcpServerHandler::new(
             create_auth_credentials(username, password),
         )),
+        #[cfg(feature = "shadowsocks")]
         ServerProxyConfig::Shadowsocks(ShadowsocksConfig { cipher, password }) => {
             if let Some(stripped) = cipher.strip_prefix("2022-blake3-") {
                 let key_bytes = BASE64
@@ -72,10 +81,12 @@ pub fn create_tcp_server_handler(
             udp_enabled,
             udp_num_sockets,
         )),
+        #[cfg(feature = "vless")]
         ServerProxyConfig::Vless {
             user_id,
             udp_enabled,
         } => Box::new(VlessTcpServerHandler::new(&user_id, udp_enabled)),
+        #[cfg(feature = "trojan")]
         ServerProxyConfig::Trojan {
             password,
             shadowsocks,
@@ -103,6 +114,7 @@ pub fn create_tcp_server_handler(
                 tls_buffer_size,
             ))
         }
+        #[cfg(feature = "vmess")]
         ServerProxyConfig::Vmess {
             cipher,
             user_id,

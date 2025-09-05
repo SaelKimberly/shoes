@@ -1,3 +1,4 @@
+#![cfg(any(feature = "vmess", feature = "vless"))]
 use futures::ready;
 use tokio::io::ReadBuf;
 

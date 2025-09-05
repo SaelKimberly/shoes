@@ -575,9 +575,11 @@ fn validate_server_proxy_config(
     named_pems: &HashMap<String, String>,
 ) -> std::io::Result<()> {
     match server_proxy_config {
+        #[cfg(feature = "vless")]
         ServerProxyConfig::Vless { user_id, .. } => {
             parse_uuid(user_id)?;
         }
+        #[cfg(feature = "vmess")]
         ServerProxyConfig::Vmess { user_id, .. } => {
             parse_uuid(user_id)?;
         }
@@ -807,6 +809,7 @@ pub async fn save_config(path: &Path, configs: &[Config]) -> std::io::Result<()>
     Ok(())
 }
 
+#[cfg(feature = "vmess")]
 #[cfg(test)]
 mod tests {
     use super::*;

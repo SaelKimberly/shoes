@@ -1,25 +1,31 @@
-use std::net::{Ipv4Addr, Ipv6Addr};
-
 use async_trait::async_trait;
 use log::info;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 use crate::address::{Address, NetLocation};
 use crate::async_stream::AsyncStream;
-use crate::option_util::NoneOrOne;
-use crate::stream_reader::StreamReader;
-use crate::tcp_handler::{
-    TcpClientHandler, TcpClientSetupResult, TcpServerHandler, TcpServerSetupResult,
-};
+use crate::tcp_handler::{TcpClientHandler, TcpClientSetupResult};
 use crate::util::{allocate_vec, parse_uuid, write_all};
-use crate::vless_message_stream::VlessMessageStream;
 
+#[cfg(feature = "vless")]
+use crate::option_util::NoneOrOne;
+#[cfg(feature = "vless")]
+use crate::stream_reader::StreamReader;
+#[cfg(feature = "vless")]
+use crate::tcp_handler::{TcpServerHandler, TcpServerSetupResult};
+#[cfg(feature = "vless")]
+use crate::vless_message_stream::VlessMessageStream;
+#[cfg(feature = "vless")]
+use std::net::{Ipv4Addr, Ipv6Addr};
+
+#[cfg(feature = "vless")]
 #[derive(Debug)]
 pub struct VlessTcpServerHandler {
     user_id: Box<[u8]>,
     udp_enabled: bool,
 }
 
+#[cfg(feature = "vless")]
 impl VlessTcpServerHandler {
     pub fn new(user_id: &str, udp_enabled: bool) -> Self {
         Self {
@@ -29,11 +35,13 @@ impl VlessTcpServerHandler {
     }
 }
 
+#[cfg(feature = "vless")]
 const SERVER_RESPONSE_HEADER: &[u8] = &[
     0u8, // version
     0u8, // addons length
 ];
 
+#[cfg(feature = "vless")]
 #[async_trait]
 impl TcpServerHandler for VlessTcpServerHandler {
     async fn setup_server_stream(
